@@ -71,7 +71,7 @@ The app is built so that going live is a contained change:
   /mock       agents, evalRuns, telemetry, alerts, costLedger, pipelines, scenarios, agent365, seed
   /types      domain models
 /api          SWA managed-function stub for live Azure OpenAI chat — OFF by default
-staticwebapp.config.json
+public/staticwebapp.config.json   (copied to /dist on build — SPA fallback + security headers)
 .github/workflows/azure-static-web-apps.yml
 ```
 
