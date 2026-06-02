@@ -57,7 +57,7 @@ export const SCENARIOS: DemoScenario[] = [
     tagline: 'Baggage Enquiry Bot',
     description:
       'The Baggage Enquiry Bot sits in the publish gate; a confidence-driven handover to a human (and agent-to-agent to Ops Copilot) fires.',
-    route: '/lifecycle',
+    route: '/ask',
     highlightSchema: 'syd_baggageEnquiryBot',
     banner:
       'Baggage Enquiry Bot pending approval — confidence-driven handover validated.',
