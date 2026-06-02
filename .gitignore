@@ -18,6 +18,9 @@ dist-ssr
 !.env.example
 api/local.settings.json
 
+# Local Claude Code launch/preview config (machine-specific absolute paths)
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
