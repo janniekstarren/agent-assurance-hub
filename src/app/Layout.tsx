@@ -2,14 +2,15 @@
     the global Ask drawer. */
 
 import { makeStyles, tokens } from '@fluentui/react-components';
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import { MotionConfig } from 'framer-motion';
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { NavRail } from './NavRail';
 import { CommandBar } from './CommandBar';
 import { ScenarioBanner } from './ScenarioBanner';
 import { AskDrawer } from './AskDrawer';
 import { AgentDrawer } from '../components/AgentDrawer';
-import { pageVariants } from './motion';
+import { LoadingState } from '../components/primitives';
 
 const useStyles = makeStyles({
   root: { display: 'flex', height: '100%', width: '100%', overflow: 'hidden' },
@@ -35,19 +36,15 @@ export function Layout() {
           <CommandBar />
           <ScenarioBanner />
           <main className={`${s.content} scroll-area`}>
-            <AnimatePresence mode="wait">
-              <motion.div
+            <Suspense fallback={<div style={{ paddingTop: 60 }}><LoadingState /></div>}>
+              <div
                 key={location.pathname}
-                className={`${s.page} scroll-area`}
+                className={`${s.page} page-enter scroll-area`}
                 style={{ overflowY: 'auto' }}
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
               >
                 <Outlet />
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            </Suspense>
           </main>
         </div>
         <AskDrawer />

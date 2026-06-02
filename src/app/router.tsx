@@ -1,15 +1,19 @@
-/** Route table — the eight modules under the shared Layout. */
+/** Route table — the eight modules under the shared Layout. Each module is
+    code-split (lazy) so the initial bundle stays small; the shell + Overview
+    load first, the rest on navigation. */
 
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Layout } from './Layout';
-import { OverviewPage } from '../modules/overview/OverviewPage';
-import { AgentsPage } from '../modules/agents/AgentsPage';
-import { AssurancePage } from '../modules/assurance/AssurancePage';
-import { SafetyPage } from '../modules/safety/SafetyPage';
-import { CostPage } from '../modules/cost/CostPage';
-import { LifecyclePage } from '../modules/lifecycle/LifecyclePage';
-import { Agent365Page } from '../modules/agent365/Agent365Page';
-import { AskPage } from '../modules/ask/AskPage';
+
+const OverviewPage = lazy(() => import('../modules/overview/OverviewPage').then((m) => ({ default: m.OverviewPage })));
+const AgentsPage = lazy(() => import('../modules/agents/AgentsPage').then((m) => ({ default: m.AgentsPage })));
+const AssurancePage = lazy(() => import('../modules/assurance/AssurancePage').then((m) => ({ default: m.AssurancePage })));
+const SafetyPage = lazy(() => import('../modules/safety/SafetyPage').then((m) => ({ default: m.SafetyPage })));
+const CostPage = lazy(() => import('../modules/cost/CostPage').then((m) => ({ default: m.CostPage })));
+const LifecyclePage = lazy(() => import('../modules/lifecycle/LifecyclePage').then((m) => ({ default: m.LifecyclePage })));
+const Agent365Page = lazy(() => import('../modules/agent365/Agent365Page').then((m) => ({ default: m.Agent365Page })));
+const AskPage = lazy(() => import('../modules/ask/AskPage').then((m) => ({ default: m.AskPage })));
 
 export const router = createBrowserRouter([
   {
