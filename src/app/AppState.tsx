@@ -59,7 +59,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     readStored<ThemeMode>('aah.theme', 'light'),
   );
   const [navCollapsed, setNavCollapsed] = useState<boolean>(
-    () => readStored<string>('aah.nav', 'false') === 'true',
+    () => readStored<string>('aah.nav', 'true') === 'true',
   );
   const [persona, setPersonaState] = useState<PersonaId>(() =>
     readStored<PersonaId>('aah.persona', 'mvp'),
