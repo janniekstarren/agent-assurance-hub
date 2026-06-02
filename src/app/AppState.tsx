@@ -33,6 +33,10 @@ interface AppState {
   setAskOpen: (open: boolean) => void;
   askSeed: string | null;
   openAskWith: (question: string) => void;
+  /** The agent profile slide-over (the spine other modules deep-link into). */
+  agentDrawerId: string | null;
+  openAgent: (id: string) => void;
+  closeAgent: () => void;
 }
 
 const AppStateContext = createContext<AppState | null>(null);
@@ -53,6 +57,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   );
   const [askOpen, setAskOpen] = useState(false);
   const [askSeed, setAskSeed] = useState<string | null>(null);
+  const [agentDrawerId, setAgentDrawerId] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('aah.theme', themeMode);
@@ -72,6 +77,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setAskSeed(question);
     setAskOpen(true);
   }, []);
+  const openAgent = useCallback((id: string) => setAgentDrawerId(id), []);
+  const closeAgent = useCallback(() => setAgentDrawerId(null), []);
 
   const value = useMemo<AppState>(
     () => ({
@@ -87,8 +94,24 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setAskOpen,
       askSeed,
       openAskWith,
+      agentDrawerId,
+      openAgent,
+      closeAgent,
     }),
-    [themeMode, toggleTheme, environment, timeRange, scenario, askOpen, askSeed, openAskWith, setScenario],
+    [
+      themeMode,
+      toggleTheme,
+      environment,
+      timeRange,
+      scenario,
+      askOpen,
+      askSeed,
+      openAskWith,
+      setScenario,
+      agentDrawerId,
+      openAgent,
+      closeAgent,
+    ],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

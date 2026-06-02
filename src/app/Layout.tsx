@@ -8,6 +8,7 @@ import { NavRail } from './NavRail';
 import { CommandBar } from './CommandBar';
 import { ScenarioBanner } from './ScenarioBanner';
 import { AskDrawer } from './AskDrawer';
+import { AgentDrawer } from '../components/AgentDrawer';
 import { pageVariants } from './motion';
 
 const useStyles = makeStyles({
@@ -50,6 +51,7 @@ export function Layout() {
           </main>
         </div>
         <AskDrawer />
+        <AgentDrawer />
       </div>
     </MotionConfig>
   );

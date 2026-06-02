@@ -15,7 +15,7 @@ import { KpiTile } from '../../components/KpiTile';
 import { Sparkline } from '../../components/Sparkline';
 import { SeverityBadge } from '../../components/badges';
 import { useEstateOverview, usePulse } from '../../services/hooks';
-import { compactCredits, nf } from '../../utils/format';
+import { nf } from '../../utils/format';
 import type { AttentionItem, GovernanceZone } from '../../types/domain';
 
 const useStyles = makeStyles({
