@@ -3,11 +3,33 @@
 
 import type { Citation } from '../../types/domain';
 
+export type ChatTone = 'good' | 'bad' | 'warn' | 'neutral';
+
+export interface ChatMetric {
+  label: string;
+  value: string;
+  tone?: ChatTone;
+}
+
+export interface ChatListItem {
+  title: string;
+  detail: string;
+  badge?: string;
+  tone?: ChatTone;
+}
+
+/** A structured response template the assistant renders below its prose answer. */
+export type ChatTemplate =
+  | { kind: 'metrics'; title?: string; metrics: ChatMetric[] }
+  | { kind: 'list'; title?: string; items: ChatListItem[] };
+
 export interface ChatResult {
   answer: string;
   citations: Citation[];
   /** Names of the tools (telemetry queries) the provider "called". */
   toolsUsed: string[];
+  /** Optional structured card rendered with the answer. */
+  template?: ChatTemplate;
 }
 
 export interface ChatProvider {
@@ -24,6 +46,7 @@ export interface ChatMessage {
   content: string;
   citations?: Citation[];
   toolsUsed?: string[];
+  template?: ChatTemplate;
   /** True while the assistant text is still streaming in. */
   streaming?: boolean;
 }

@@ -1,6 +1,7 @@
-import { Tooltip, makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
+import { Badge, Tooltip, makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
 import {
   CheckmarkCircle16Filled,
+  Info16Regular,
   ShieldKeyhole24Regular,
   Warning16Filled,
   DataTrending24Regular,
@@ -64,7 +65,35 @@ const useStyles = makeStyles({
   regRight: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' },
   riskCard: { padding: '12px', borderRadius: tokens.borderRadiusLarge, border: `1px solid ${tokens.colorNeutralStroke2}`, marginBottom: '10px', backgroundColor: tokens.colorNeutralBackground1 },
   riskDetections: { margin: '6px 0 0', paddingLeft: '16px', fontSize: '12px', lineHeight: 1.6, color: tokens.colorNeutralForeground2 },
+  cardGrid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(228px, 1fr))', gap: '12px', marginTop: '10px' },
+  pathCard: { padding: '12px 14px', borderRadius: tokens.borderRadiusLarge, border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: tokens.colorNeutralBackground1, display: 'flex', flexDirection: 'column', gap: '5px' },
+  pathHead: { display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '13px' },
+  pathPlatforms: { fontSize: '12px', fontWeight: 600, color: tokens.colorBrandForeground1 },
+  pathDesc: { fontSize: '11.5px', color: tokens.colorNeutralForeground3, lineHeight: 1.45 },
+  note: { display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '11.5px', color: tokens.colorNeutralForeground2, lineHeight: 1.5, padding: '10px 12px', borderRadius: tokens.borderRadiusLarge, backgroundColor: tokens.colorNeutralBackground2, border: `1px solid ${tokens.colorNeutralStroke2}`, marginTop: '12px' },
 });
+
+const PATHS: { title: string; tag: 'GA' | 'preview' | 'announced'; platforms: string; desc: string }[] = [
+  { title: 'Auto-discovery', tag: 'GA', platforms: 'Amazon Bedrock · Google Vertex AI', desc: 'Existing agents are pulled in automatically via the cloud-provider API — no code change. Visible in the registry; observability layered via the SDK.' },
+  { title: 'Agent factories', tag: 'GA', platforms: 'n8n · Kore · Kasisto', desc: 'Each agent the platform builds auto-gets a governed Entra Agent ID and inherits identity, compliance and observability.' },
+  { title: 'Agent 365 SDK', tag: 'GA', platforms: 'OpenAI Agents SDK · Claude · LangChain', desc: 'Wrap an agent built on any framework to add an Entra identity, Work IQ tools, OpenTelemetry observability and governance.' },
+  { title: 'Shadow discovery', tag: 'preview', platforms: 'Defender + Intune', desc: 'Unsanctioned local agents (e.g. OpenClaw) are detected on managed devices and can be blocked via Intune policy. Expanding June 2026.' },
+  { title: 'Identity provisioning', tag: 'announced', platforms: 'ServiceNow · Workday', desc: 'Announced partnerships to auto-provision Entra Agent IDs for agents created there. Roadmap — not yet GA.' },
+];
+
+function StatusTagBadge({ tag }: { tag: 'GA' | 'preview' | 'announced' }) {
+  const map = {
+    GA: { color: 'success' as const, label: 'GA' },
+    preview: { color: 'informative' as const, label: 'preview' },
+    announced: { color: 'warning' as const, label: 'announced' },
+  };
+  const m = map[tag];
+  return (
+    <Badge appearance="outline" color={m.color} size="small">
+      {m.label}
+    </Badge>
+  );
+}
 
 export function Agent365Page() {
   const s = useStyles();
@@ -134,6 +163,10 @@ export function Agent365Page() {
             <div className={s.statTop}><span className={s.statLabel}>Risky agents</span><PreviewTag note="Entra ID Protection riskyAgents / agentRiskDetections (beta)" /></div>
             <div className={s.statNum} style={{ color: '#D83B01' }}>{summary.riskyAgents}</div>
           </div>
+          <div className={s.stat}>
+            <div className={s.statTop}><span className={s.statLabel}>External / 3rd-party</span></div>
+            <div className={s.statNum} style={{ color: '#8332B0' }}>{summary.external}</div>
+          </div>
         </div>
       )}
 
@@ -147,20 +180,41 @@ export function Agent365Page() {
                 className={mergeClasses(s.regRow, r.registryStatus === 'shadow' && s.regShadow)}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                onClick={() => openAgent(r.agentId)}
-                style={focusSchema === r.schemaName ? { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: 2 } : undefined}
+                onClick={() => {
+                  if (!r.external) openAgent(r.agentId);
+                }}
+                style={{
+                  cursor: r.external ? 'default' : 'pointer',
+                  ...(focusSchema === r.schemaName
+                    ? { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: 2 }
+                    : {}),
+                }}
               >
                 <div style={{ minWidth: 0 }}>
-                  <div className={s.regName}>{r.displayName}</div>
-                  <div className={s.mono}>{r.entraAgentId}</div>
+                  <div className={s.regName} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {r.displayName}
+                    {r.external && (
+                      <Badge appearance="tint" color="severe" size="small">
+                        External
+                      </Badge>
+                    )}
+                  </div>
+                  {r.external ? (
+                    <div className={s.mono} style={{ whiteSpace: 'normal' }}>
+                      {r.platform} · {r.integrationPath}
+                    </div>
+                  ) : (
+                    <div className={s.mono}>{r.entraAgentId}</div>
+                  )}
                 </div>
                 <div className={s.regRight}>
+                  {r.external && r.statusTag && <StatusTagBadge tag={r.statusTag} />}
                   {r.conditionalAccess ? (
                     <Tooltip content="Conditional Access enforced" relationship="label">
                       <CheckmarkCircle16Filled style={{ color: tokens.colorStatusSuccessForeground1 }} />
                     </Tooltip>
                   ) : (
-                    <Tooltip content="No Conditional Access" relationship="label">
+                    <Tooltip content="No Conditional Access enforced" relationship="label">
                       <Warning16Filled style={{ color: tokens.colorStatusWarningForeground1 }} />
                     </Tooltip>
                   )}
@@ -198,6 +252,35 @@ export function Agent365Page() {
           </div>
         </Panel>
       </div>
+
+      <Panel>
+        <SectionTitle
+          title="Exposing agents from other platforms"
+          caption="Agent 365 registers and governs non-Microsoft agents — the path depends on the platform."
+          actions={<PreviewTag note="A mix of GA, preview and announced capabilities" />}
+        />
+        <div className={s.cardGrid2}>
+          {PATHS.map((p) => (
+            <div key={p.title} className={s.pathCard}>
+              <div className={s.pathHead}>
+                {p.title}
+                <StatusTagBadge tag={p.tag} />
+              </div>
+              <div className={s.pathPlatforms}>{p.platforms}</div>
+              <div className={s.pathDesc}>{p.desc}</div>
+            </div>
+          ))}
+        </div>
+        <div className={s.note}>
+          <Info16Regular style={{ marginTop: 1, flexShrink: 0 }} />
+          <span>
+            Visibility ≠ enforcement: Conditional Access, DLP and Defender enforce only when the
+            agent authenticates through an Entra Agent ID. Salesforce Agentforce is not a
+            Microsoft-documented partner (interop is via the open A2A protocol). ServiceNow / Workday
+            identity provisioning is announced, not yet GA.
+          </span>
+        </div>
+      </Panel>
 
       <Panel>
         <SectionTitle title="Honesty note" />

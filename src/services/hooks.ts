@@ -134,6 +134,13 @@ export function useEnvLicensing() {
 export function useSeatLicenses() {
   return useQuery({ queryKey: ['seats'], queryFn: cost.getSeatLicenses, staleTime: STALE });
 }
+export function useAgentLicensing() {
+  return useQuery({
+    queryKey: ['agent-licensing'],
+    queryFn: cost.getAgentLicensing,
+    staleTime: STALE,
+  });
+}
 
 // --- lifecycle --------------------------------------------------------------
 export function usePipelineRuns() {

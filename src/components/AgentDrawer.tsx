@@ -52,6 +52,7 @@ import {
   SeverityBadge,
   ZoneBadge,
 } from './badges';
+import { AgentTypeBadge } from './AgentTypeBadge';
 import { ChartTooltip, useChartTheme } from './charts';
 import { LoadingState } from './primitives';
 import { featureLabel } from '../mock/creditWeights';
@@ -194,9 +195,7 @@ function DrawerContent({ id, onClose }: { id: string; onClose: () => void }) {
             <ZoneBadge zone={agent.zone} />
             <LifecycleBadge state={agent.lifecycleState} />
             <RegistryBadge status={agent.registryStatus} />
-            <Badge appearance="outline" size="small">
-              {agent.type === 'copilot-studio' ? 'Copilot Studio' : 'Foundry code'}
-            </Badge>
+            <AgentTypeBadge type={agent.type} />
           </div>
         )}
       </DrawerHeader>
@@ -457,6 +456,11 @@ function CostTab({ agent, onClose }: { agent: Agent; onClose: () => void }) {
           </div>
           <div className={s.statLabel}>Zero-rated</div>
         </div>
+      </div>
+
+      <div className={s.fieldGrid}>
+        <Field label="Funding model (derived)">{data.fundingModelLabel}</Field>
+        <Field label="Environment">{ENV_LABEL[agent.environment]}</Field>
       </div>
 
       <div className={s.section}>

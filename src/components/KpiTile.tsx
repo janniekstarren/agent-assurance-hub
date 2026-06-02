@@ -8,7 +8,7 @@ import { CountUp } from './CountUp';
 import { Panel } from './primitives';
 
 const useStyles = makeStyles({
-  tile: { display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '116px' },
+  tile: { display: 'flex', flexDirection: 'column', gap: '6px', height: '100%' },
   head: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
   label: {
     fontSize: '12px',

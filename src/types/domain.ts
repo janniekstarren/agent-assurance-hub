@@ -409,6 +409,14 @@ export interface Agent365Record {
   governedControls: string[];
   conditionalAccess: boolean;
   lastSeen: string;
+  /** True for non-Microsoft / third-party agents surfaced via Agent 365. */
+  external?: boolean;
+  /** The originating platform, e.g. 'Amazon Bedrock', 'n8n', 'LangChain'. */
+  platform?: string;
+  /** How it is registered/governed, e.g. 'Auto-discovered via Bedrock API'. */
+  integrationPath?: string;
+  /** Feasibility status of the integration in the real product. */
+  statusTag?: 'GA' | 'preview' | 'announced';
 }
 
 // ---------------------------------------------------------------------------

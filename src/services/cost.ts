@@ -11,6 +11,7 @@
 
 import type {
   AgentBudget,
+  AgentType,
   CallerType,
   CostRecord,
   EnvLicensing,
@@ -21,10 +22,16 @@ import type {
 import {
   BUDGETS,
   ENV_LICENSING,
+  FUNDING_MODELS,
   SEAT_LICENSES,
+  agentBilledSplit,
   costRecords,
+  fundingModelFor,
 } from '../mock/costLedger';
+import { AGENTS } from '../mock/agents';
 import { respond } from './mockApi';
+
+export { FUNDING_MODELS };
 
 const MTD_START = '2026-05-01';
 const PAYG_RATE = 0.01;
@@ -137,6 +144,7 @@ export interface AgentCostBreakdown {
   total: number;
   billedCredits: number;
   zeroRatedCredits: number;
+  fundingModelLabel: string;
   byFeature: { feature: MeterFeature; credits: number }[];
   byCallerType: { callerType: CallerType; credits: number; billed: boolean }[];
 }
@@ -164,6 +172,7 @@ export async function getAgentCostBreakdown(
       total: round(billed + zeroRated),
       billedCredits: round(billed),
       zeroRatedCredits: round(zeroRated),
+      fundingModelLabel: fundingModelFor(schemaName, environment).label,
       byFeature: [...byFeature.entries()]
         .map(([feature, credits]) => ({ feature, credits: round(credits) }))
         .sort((a, b) => b.credits - a.credits),
@@ -179,6 +188,56 @@ export async function getAgentCostBreakdown(
 
 export async function getBudgets(): Promise<AgentBudget[]> {
   return respond(BUDGETS, { label: 'cost.budgets' });
+}
+
+export interface AgentLicensingRow {
+  schemaName: string;
+  agentName: string;
+  environment: Environment;
+  type: AgentType;
+  fundingModelId: string;
+  fundingModelLabel: string;
+  total: number;
+  billed: number;
+  zeroRated: number;
+  zeroRatedPct: number;
+  capCredits: number | null;
+  capPct: number | null;
+  hardStop: boolean;
+}
+
+/** Per-agent derived funding view: each agent's environment-level funding model
+    (overridden to seat-covered when mostly zero-rated), caller-coverage split,
+    and per-agent cap status. The native unit is the environment; this is a
+    derived presentation. */
+export async function getAgentLicensing(): Promise<AgentLicensingRow[]> {
+  const rows: AgentLicensingRow[] = [];
+  for (const a of AGENTS) {
+    const split = agentBilledSplit(a.schemaName, a.environment);
+    if (split.total < 1) continue;
+    const fm = fundingModelFor(a.schemaName, a.environment);
+    const budget = BUDGETS.find(
+      (b) => b.schemaName === a.schemaName && b.environment === a.environment,
+    );
+    const capped = budget && budget.monthlyCapCredits > 0 ? budget : undefined;
+    rows.push({
+      schemaName: a.schemaName,
+      agentName: a.displayName,
+      environment: a.environment,
+      type: a.type,
+      fundingModelId: fm.id,
+      fundingModelLabel: fm.label,
+      total: split.total,
+      billed: split.billed,
+      zeroRated: split.zeroRated,
+      zeroRatedPct: split.total > 0 ? Math.round((split.zeroRated / split.total) * 100) : 0,
+      capCredits: capped ? capped.monthlyCapCredits : null,
+      capPct: capped ? Math.round((capped.mtdCredits / capped.monthlyCapCredits) * 100) : null,
+      hardStop: budget?.hardStop ?? false,
+    });
+  }
+  rows.sort((x, y) => y.total - x.total);
+  return respond(rows, { label: 'cost.licensing-agents' });
 }
 
 export async function getEnvLicensing(): Promise<EnvLicensing[]> {

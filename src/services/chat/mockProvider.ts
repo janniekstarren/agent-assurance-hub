@@ -51,6 +51,16 @@ const HANDLERS: Handler[] = [
           `failed (2 of 4 cases) and promotion to Prod is blocked.`,
         citations: [cite('Construction Contract Checker · Assurance', '/assurance?agent=syd_contractChecker', 'agent')],
         toolsUsed: ['query_evaluation'],
+        template: {
+          kind: 'metrics',
+          title: 'Construction Contract Checker — Prod',
+          metrics: [
+            { label: 'Groundedness before', value: `${d.groundednessBefore}%`, tone: 'neutral' },
+            { label: 'Groundedness now', value: `${d.groundednessAfter}%`, tone: 'bad' },
+            { label: 'Change', value: `−${d.groundednessBefore - d.groundednessAfter} pts`, tone: 'bad' },
+            { label: 'Quality gate', value: 'Fail', tone: 'bad' },
+          ],
+        },
       };
     },
   },
@@ -70,6 +80,16 @@ const HANDLERS: Handler[] = [
           `cap — over budget, though PAYG means no cutoff.`,
         citations: [cite('Airport Ops Copilot · Cost', '/cost?agent=syd_airportOpsCopilot', 'agent')],
         toolsUsed: ['query_cost', 'query_budgets'],
+        template: {
+          kind: 'metrics',
+          title: 'Airport Ops Copilot — month to date',
+          metrics: [
+            { label: 'Credits', value: nf(opsMtd), tone: 'neutral' },
+            { label: 'of cap', value: `${pct}%`, tone: pct > 100 ? 'bad' : 'warn' },
+            { label: 'Billed', value: '100%', tone: 'bad' },
+            { label: 'Top meter', value: 'Reasoning surcharge', tone: 'warn' },
+          ],
+        },
       };
     },
   },
@@ -92,6 +112,14 @@ const HANDLERS: Handler[] = [
           cite('Safety alert stream', '/safety', 'module'),
         ],
         toolsUsed: ['query_safety'],
+        template: {
+          kind: 'list',
+          title: 'Flagged for data exposure',
+          items: [
+            { title: 'Snowflake Data Agent', detail: 'Oversharing of Confidential FINANCE rows + a jailbreak attempt blocked', badge: 'critical', tone: 'bad' },
+            { title: 'Invoice Reconciliation Agent', detail: 'XPIA via a supplier invoice + Confidential access (shadow agent)', badge: 'high', tone: 'bad' },
+          ],
+        },
       };
     },
   },
@@ -112,6 +140,16 @@ const HANDLERS: Handler[] = [
           `line: ${near.map((r) => `${r.b.agentName} (~${r.pct}%)`).join(', ') || 'none'}.`,
         citations: [cite('Budgets & enforcement · Cost', '/cost', 'module')],
         toolsUsed: ['query_budgets'],
+        template: {
+          kind: 'list',
+          title: 'Budget run-rate vs cap',
+          items: ranked.slice(0, 4).map((r) => ({
+            title: r.b.agentName,
+            detail: `${nf(r.b.mtdCredits)} / ${nf(r.b.monthlyCapCredits)} credits`,
+            badge: `${r.pct}%`,
+            tone: r.pct >= 100 ? 'bad' : r.pct >= 75 ? 'warn' : 'good',
+          })),
+        },
       };
     },
   },
@@ -129,6 +167,13 @@ const HANDLERS: Handler[] = [
           `Copilot) has been validated in Dev. No agents are pending approval in Test.`,
         citations: [cite('Approval gate · Lifecycle', '/lifecycle?agent=syd_baggageEnquiryBot', 'module')],
         toolsUsed: ['query_lifecycle'],
+        template: {
+          kind: 'list',
+          title: 'Pending approval',
+          items: [
+            { title: `${name} (Dev)`, detail: 'In the publish gate; confidence-driven handover validated', badge: 'Requested', tone: 'warn' },
+          ],
+        },
       };
     },
   },
@@ -145,6 +190,18 @@ const HANDLERS: Handler[] = [
           `data. It is the highest-risk agent in the estate and is unmonitored by the assurance programme.`,
         citations: [cite('Registry · Agent 365', '/agent365?agent=syd_invoiceReconciliation', 'module')],
         toolsUsed: ['query_agent365'],
+        template: {
+          kind: 'list',
+          title: 'Shadow agents',
+          items: [
+            {
+              title: shadow[0]?.displayName ?? 'Invoice Reconciliation Agent',
+              detail: 'Autonomous, own identity, Confidential data, no DLP — discovered by Defender',
+              badge: 'high risk',
+              tone: 'bad',
+            },
+          ],
+        },
       };
     },
   },
@@ -161,6 +218,16 @@ const HANDLERS: Handler[] = [
           `drifting, and a shadow Invoice agent. Open the Overview for the full picture.`,
         citations: [cite('Estate overview', '/overview', 'module'), cite('Agent inventory', '/agents', 'module')],
         toolsUsed: ['query_inventory'],
+        template: {
+          kind: 'metrics',
+          title: 'Estate',
+          metrics: [
+            { label: 'Agents', value: String(AGENTS.length), tone: 'neutral' },
+            { label: 'In Prod', value: String(prod), tone: 'neutral' },
+            { label: 'Copilot Studio', value: String(AGENTS.filter((a) => a.type === 'copilot-studio').length), tone: 'neutral' },
+            { label: 'Foundry', value: String(AGENTS.filter((a) => a.type === 'foundry-code').length), tone: 'neutral' },
+          ],
+        },
       };
     },
   },

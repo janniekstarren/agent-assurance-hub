@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../../app/AppState';
 import { getChatProvider, SUGGESTED_PROMPTS } from '../../services/chat';
-import type { ChatMessage } from '../../services/chat';
+import type { ChatMessage, ChatTemplate, ChatTone } from '../../services/chat';
 import type { Citation } from '../../types/domain';
 
 const useStyles = makeStyles({
@@ -30,7 +30,63 @@ const useStyles = makeStyles({
   dots: { display: 'inline-flex', gap: '3px', alignItems: 'center', height: '14px' },
   dot: { width: '6px', height: '6px', borderRadius: '999px', background: tokens.colorNeutralForeground3 },
   inputRow: { display: 'flex', gap: '8px', alignItems: 'center', paddingTop: '10px', borderTop: `1px solid ${tokens.colorNeutralStroke2}` },
+  tplCard: { border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: tokens.borderRadiusLarge, padding: '10px 12px', backgroundColor: tokens.colorNeutralBackground1, display: 'flex', flexDirection: 'column', gap: '8px' },
+  tplTitle: { fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', color: tokens.colorNeutralForeground3 },
+  metricStrip: { display: 'flex', flexWrap: 'wrap', gap: '8px' },
+  metric: { display: 'flex', flexDirection: 'column', gap: '1px', padding: '6px 10px', borderRadius: tokens.borderRadiusMedium, backgroundColor: tokens.colorNeutralBackground2, minWidth: '72px' },
+  metricVal: { fontSize: '16px', fontWeight: 700, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 },
+  metricLbl: { fontSize: '10px', color: tokens.colorNeutralForeground3 },
+  tplList: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  tplItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', borderRadius: tokens.borderRadiusMedium, backgroundColor: tokens.colorNeutralBackground2 },
+  tplItemMain: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1px' },
+  tplItemTitle: { fontSize: '12.5px', fontWeight: 600 },
+  tplItemDetail: { fontSize: '11px', color: tokens.colorNeutralForeground3, lineHeight: 1.4 },
 });
+
+function toneColor(t?: ChatTone): string | undefined {
+  return t === 'good' ? '#107C10' : t === 'bad' ? '#C50F1F' : t === 'warn' ? '#B88217' : undefined;
+}
+
+function toneBadge(t?: ChatTone): 'danger' | 'warning' | 'success' | 'informative' {
+  return t === 'bad' ? 'danger' : t === 'warn' ? 'warning' : t === 'good' ? 'success' : 'informative';
+}
+
+function TemplateCard({ template }: { template: ChatTemplate }) {
+  const s = useStyles();
+  return (
+    <div className={s.tplCard}>
+      {template.title && <span className={s.tplTitle}>{template.title}</span>}
+      {template.kind === 'metrics' ? (
+        <div className={s.metricStrip}>
+          {template.metrics.map((m, i) => (
+            <div key={i} className={s.metric}>
+              <span className={s.metricVal} style={{ color: toneColor(m.tone) }}>
+                {m.value}
+              </span>
+              <span className={s.metricLbl}>{m.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={s.tplList}>
+          {template.items.map((it, i) => (
+            <div key={i} className={s.tplItem}>
+              <span className={s.tplItemMain}>
+                <span className={s.tplItemTitle}>{it.title}</span>
+                <span className={s.tplItemDetail}>{it.detail}</span>
+              </span>
+              {it.badge && (
+                <Badge appearance="tint" color={toneBadge(it.tone)} size="small">
+                  {it.badge}
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Rich({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -104,7 +160,14 @@ export function ChatPanel({ seed, embedded }: { seed?: string | null; embedded?:
       setMessages((m) =>
         m.map((x) =>
           x.id === aId
-            ? { ...x, content: res.answer, citations: res.citations, toolsUsed: res.toolsUsed, streaming: false }
+            ? {
+                ...x,
+                content: res.answer,
+                citations: res.citations,
+                toolsUsed: res.toolsUsed,
+                template: res.template,
+                streaming: false,
+              }
             : x,
         ),
       );
@@ -182,6 +245,7 @@ export function ChatPanel({ seed, embedded }: { seed?: string | null; embedded?:
                 <div className={s.botBubble}>
                   {m.content ? <Rich text={m.content} /> : <Thinking />}
                 </div>
+                {m.template && !m.streaming && <TemplateCard template={m.template} />}
                 {m.citations && m.citations.length > 0 && (
                   <div className={s.citations}>
                     {m.citations.map((c) => (

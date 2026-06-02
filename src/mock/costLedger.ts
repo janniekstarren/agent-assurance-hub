@@ -211,14 +211,59 @@ export const SEAT_LICENSES: SeatLicense[] = [
     priceUsd: 15,
     unit: 'user / month',
     seats: 120,
-    note: 'GA 1 May 2026. Identity, security and registry for agents — verify current pricing.',
+    note: 'GA 1 May 2026. Governance seat (registry, Entra Agent ID, Purview, Defender) — does NOT fund or zero-rate credit consumption. Verify current pricing.',
   },
   {
     id: 'e7-frontier',
     name: 'E7 “Frontier” bundle',
-    priceUsd: 54.99,
+    priceUsd: 99,
     unit: 'user / month',
     seats: 40,
-    note: 'Bundles M365 Copilot + Agent 365 + more — figure illustrative, verify against current Microsoft pricing.',
+    note: 'E5 + M365 Copilot ($30) + Entra Suite ($12) + Agent 365 ($15). GA 1 May 2026 — verify against current Microsoft pricing.',
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Funding model (derived). Microsoft scopes the funding *model* (prepaid vs
+// PAYG) at the ENVIRONMENT level via a billing policy; zero-rating is resolved
+// per CALLER (an M365 Copilot–licensed user is seat-covered); per AGENT you can
+// only set a spending cap. So a per-agent "funding model" is a DERIVED view:
+// the environment's model, overridden to "seat-covered" when the agent's
+// traffic is mostly zero-rated. Agent 365 / E7 are a separate governance axis,
+// not a funding source.
+// ---------------------------------------------------------------------------
+
+const MTD_START = '2026-05-01';
+
+export const FUNDING_MODELS = [
+  { id: 'm365-seat', label: 'M365 Copilot (seat-covered)' },
+  { id: 'prepaid', label: 'Prepaid capacity' },
+  { id: 'shared-pool', label: 'Shared tenant pool' },
+  { id: 'payg', label: 'Pay-as-you-go' },
+] as const;
+
+export type FundingModelId = (typeof FUNDING_MODELS)[number]['id'];
+
+export function agentBilledSplit(schemaName: string, environment: string) {
+  let billed = 0;
+  let zero = 0;
+  for (const r of costRecords()) {
+    if (r.schemaName !== schemaName || r.environment !== environment || r.date < MTD_START) continue;
+    if (r.billed) billed += r.credits;
+    else zero += r.credits;
+  }
+  const total = billed + zero;
+  return { billed: round(billed, 0), zeroRated: round(zero, 0), total: round(total, 0) };
+}
+
+export function fundingModelFor(
+  schemaName: string,
+  environment: string,
+): { id: FundingModelId; label: string } {
+  const { billed, total } = agentBilledSplit(schemaName, environment);
+  const zeroShare = total > 0 ? (total - billed) / total : 1;
+  if (zeroShare >= 0.55) return FUNDING_MODELS[0];
+  if (environment === 'dev') return FUNDING_MODELS[1];
+  if (environment === 'test') return FUNDING_MODELS[2];
+  return FUNDING_MODELS[3];
+}

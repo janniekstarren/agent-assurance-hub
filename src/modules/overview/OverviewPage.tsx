@@ -22,8 +22,10 @@ const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(216px, 1fr))',
+    gridAutoRows: '150px',
     gap: '14px',
   },
+  kpiCell: { height: '100%' },
   split: {
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1.7fr) minmax(0, 1fr)',
@@ -166,7 +168,7 @@ export function OverviewPage() {
       />
 
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="Total agents"
             value={data.totalAgents}
@@ -175,7 +177,7 @@ export function OverviewPage() {
             onClick={() => navigate('/agents')}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="Estate assurance"
             value={data.assuranceScore}
@@ -186,7 +188,7 @@ export function OverviewPage() {
             onClick={() => navigate('/assurance')}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="Open safety alerts"
             value={data.openAlerts}
@@ -196,7 +198,7 @@ export function OverviewPage() {
             onClick={() => navigate('/safety')}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="MTD credit spend"
             value={data.mtdCredits}
@@ -208,7 +210,7 @@ export function OverviewPage() {
             onClick={() => navigate('/cost')}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="Pending approvals"
             value={data.pendingApprovals}
@@ -217,7 +219,7 @@ export function OverviewPage() {
             onClick={() => navigate('/lifecycle')}
           />
         </motion.div>
-        <motion.div variants={item}>
+        <motion.div variants={item} className={s.kpiCell}>
           <KpiTile
             label="Estate pulse"
             value={pulseNow}

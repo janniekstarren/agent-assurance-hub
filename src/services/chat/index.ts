@@ -15,4 +15,10 @@ export function getChatProvider(): ChatProvider {
 }
 
 export { SUGGESTED_PROMPTS } from './mockProvider';
-export type { ChatMessage, ChatProvider, ChatResult } from './types';
+export type {
+  ChatMessage,
+  ChatProvider,
+  ChatResult,
+  ChatTemplate,
+  ChatTone,
+} from './types';

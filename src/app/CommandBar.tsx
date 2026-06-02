@@ -16,6 +16,7 @@ import {
 } from '@fluentui/react-components';
 import {
   ChatSparkle20Regular,
+  LineHorizontal320Regular,
   WeatherMoon20Regular,
   WeatherSunny20Regular,
 } from '@fluentui/react-icons';
@@ -85,10 +86,19 @@ export function CommandBar() {
     themeMode,
     toggleTheme,
     openAskWith,
+    toggleNav,
   } = useAppState();
 
   return (
     <header className={mergeClasses(s.bar, 'acrylic')}>
+      <Tooltip content="Collapse / expand menu" relationship="label">
+        <Button
+          appearance="subtle"
+          icon={<LineHorizontal320Regular />}
+          aria-label="Toggle navigation menu"
+          onClick={toggleNav}
+        />
+      </Tooltip>
       <div className={s.titleWrap}>
         <span className={s.titleIcon}>{nav.icon}</span>
         <span className={s.titleText}>

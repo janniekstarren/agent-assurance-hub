@@ -23,6 +23,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAppState } from '../../app/AppState';
 import { useAgents, useLineageGroups } from '../../services/hooks';
 import { EnvBadge, LifecycleBadge, RegistryBadge, ZoneBadge } from '../../components/badges';
+import { AgentTypeBadge } from '../../components/AgentTypeBadge';
 import { LoadingState, ErrorState, PageContainer, Panel, SectionTitle } from '../../components/primitives';
 import type { Agent, LifecycleState } from '../../types/domain';
 import { nf } from '../../utils/format';
@@ -113,9 +114,9 @@ export function AgentsPage() {
           <TableCellLayout>
             <span className={s.agentName}>
               <span>{a.displayName}</span>
-              <span className={s.agentSub}>
-                {a.type === 'copilot-studio' ? 'Copilot Studio' : 'Foundry code'} ·{' '}
-                {a.orchestration}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <AgentTypeBadge type={a.type} short />
+                <span className={s.agentSub}>{a.orchestration}</span>
               </span>
             </span>
           </TableCellLayout>
@@ -309,7 +310,10 @@ function LineageView({ focusSchema }: { focusSchema: string | null }) {
             <div className={s.lineHead} onClick={() => toggle(g.schemaName)}>
               {open ? <ChevronDown20Regular /> : <ChevronRight20Regular />}
               <div>
-                <div className={s.lineName}>{g.agentName}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className={s.lineName}>{g.agentName}</span>
+                  <AgentTypeBadge type={g.type} short />
+                </div>
                 <div className={s.lineMeta}>
                   {g.records.length} environment{g.records.length > 1 ? 's' : ''} · {g.owner} ·{' '}
                   {g.schemaName}

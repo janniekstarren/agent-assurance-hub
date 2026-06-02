@@ -15,11 +15,14 @@ import {
 import { useAppState } from '../../app/AppState';
 import { BudgetGauge } from '../../components/BudgetGauge';
 import { KpiTile } from '../../components/KpiTile';
+import { AgentTypeBadge } from '../../components/AgentTypeBadge';
 import { CallerBadge, EnvBadge } from '../../components/badges';
 import { ChartTooltip, useChartTheme } from '../../components/charts';
 import { ErrorState, LoadingState, PageContainer, Panel, SectionTitle } from '../../components/primitives';
 import { featureLabel } from '../../mock/creditWeights';
+import { FUNDING_MODELS } from '../../services/cost';
 import {
+  useAgentLicensing,
   useAgents,
   useBudgets,
   useCostSummary,
@@ -46,6 +49,13 @@ const FEATURE_COLOR: Record<MeterFeature, string> = {
   'voice-basic': '#3FB6E6',
 };
 
+const FUNDING_COLOR: Record<string, string> = {
+  'm365-seat': '#107C10',
+  prepaid: '#165AF1',
+  'shared-pool': '#B88217',
+  payg: '#8332B0',
+};
+
 const useStyles = makeStyles({
   footnote: { fontSize: '11.5px', color: tokens.colorNeutralForeground3, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '-8px' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' },
@@ -67,6 +77,14 @@ const useStyles = makeStyles({
   licDesc: { fontSize: '12px', color: tokens.colorNeutralForeground3, lineHeight: 1.45 },
   subH: { fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: tokens.colorNeutralForeground3, marginTop: '6px' },
   gaugeGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px', marginTop: '10px' },
+  licTable: { marginTop: '10px', overflowX: 'auto' },
+  licHead: { display: 'grid', gridTemplateColumns: '1.7fr 0.6fr 1.5fr 1.4fr 0.9fr', gap: '10px', padding: '6px 12px', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: tokens.colorNeutralForeground3, minWidth: '720px' },
+  licRow: { display: 'grid', gridTemplateColumns: '1.7fr 0.6fr 1.5fr 1.4fr 0.9fr', gap: '10px', alignItems: 'center', padding: '10px 12px', borderTop: `1px solid ${tokens.colorNeutralStroke3}`, fontSize: '12.5px', minWidth: '720px' },
+  licName: { display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 },
+  fundingBadge: { display: 'inline-flex', alignItems: 'center', padding: '2px 9px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, border: '1px solid', whiteSpace: 'nowrap', width: 'fit-content' },
+  covWrap: { display: 'flex', flexDirection: 'column', gap: '3px' },
+  covBar: { height: '7px', borderRadius: '999px', overflow: 'hidden', display: 'flex', backgroundColor: tokens.colorNeutralBackground4 },
+  covLabel: { fontSize: '10.5px', color: tokens.colorNeutralForeground3 },
 });
 
 const CALLER_OPTIONS: { value: CallerType | 'all'; label: string }[] = [
@@ -87,6 +105,7 @@ export function CostPage() {
   const [caller, setCaller] = useState<CallerType | 'all'>('all');
   const [agentFilter, setAgentFilter] = useState<string>(params.get('agent') ?? 'all');
   const [win, setWin] = useState<'mtd' | '90d'>('90d');
+  const [license, setLicense] = useState<string>('all');
 
   const baseFilter = useMemo(
     () => ({
@@ -102,6 +121,7 @@ export function CostPage() {
   const budgets = useBudgets();
   const licensing = useEnvLicensing();
   const seats = useSeatLicenses();
+  const agentLicensing = useAgentLicensing();
 
   const uniqueAgents = useMemo(() => {
     const seen = new Map<string, string>();
@@ -124,6 +144,9 @@ export function CostPage() {
     });
   const seatMonthly = (seats.data ?? []).reduce((acc, l) => acc + l.priceUsd * l.seats, 0);
   const maxCaller = Math.max(...sum.byCallerType.map((c) => c.credits), 1);
+  const licRows = (agentLicensing.data ?? []).filter(
+    (r) => license === 'all' || r.fundingModelId === license,
+  );
 
   return (
     <PageContainer>
@@ -328,6 +351,88 @@ export function CostPage() {
               </span>
             </div>
           ))}
+        </div>
+      </Panel>
+
+      <Panel>
+        <SectionTitle
+          title="Licensing by agent"
+          caption="Agents draw on different funding models — derived from each agent's environment plus its caller-licensing mix. Filter by model."
+          actions={
+            <Dropdown
+              size="small"
+              value={license === 'all' ? 'All license models' : FUNDING_MODELS.find((m) => m.id === license)?.label}
+              selectedOptions={[license]}
+              onOptionSelect={(_e, d) => d.optionValue && setLicense(d.optionValue)}
+              style={{ minWidth: 220 }}
+            >
+              <Option value="all" text="All license models">All license models</Option>
+              {FUNDING_MODELS.map((m) => (
+                <Option key={m.id} value={m.id} text={m.label}>{m.label}</Option>
+              ))}
+            </Dropdown>
+          }
+        />
+        {agentLicensing.isLoading || !agentLicensing.data ? (
+          <LoadingState />
+        ) : (
+          <div className={s.licTable}>
+            <div className={s.licHead}>
+              <span>Agent</span>
+              <span>Env</span>
+              <span>Funding model</span>
+              <span>Coverage (zero-rated vs billed)</span>
+              <span>Cap</span>
+            </div>
+            {licRows.map((r) => (
+              <div key={r.schemaName + r.environment} className={s.licRow}>
+                <span className={s.licName}>
+                  <span style={{ fontWeight: 600 }}>{r.agentName}</span>
+                  <AgentTypeBadge type={r.type} short />
+                </span>
+                <span><EnvBadge env={r.environment} /></span>
+                <span
+                  className={s.fundingBadge}
+                  style={{
+                    color: FUNDING_COLOR[r.fundingModelId],
+                    borderColor: `color-mix(in srgb, ${FUNDING_COLOR[r.fundingModelId]} 45%, transparent)`,
+                    background: `color-mix(in srgb, ${FUNDING_COLOR[r.fundingModelId]} 12%, transparent)`,
+                  }}
+                >
+                  {r.fundingModelLabel}
+                </span>
+                <span className={s.covWrap}>
+                  <span className={s.covBar}>
+                    <span style={{ width: `${r.zeroRatedPct}%`, background: '#107C10' }} />
+                    <span style={{ width: `${100 - r.zeroRatedPct}%`, background: '#C50F1F' }} />
+                  </span>
+                  <span className={s.covLabel}>
+                    {r.zeroRatedPct}% seat-covered · {100 - r.zeroRatedPct}% billed
+                  </span>
+                </span>
+                <span>
+                  {r.capPct != null ? (
+                    <span style={{ color: r.capPct > 100 ? '#C50F1F' : r.capPct >= 75 ? '#B88217' : '#107C10', fontWeight: 600 }}>
+                      {r.capPct}%{r.hardStop ? ' · stop' : ''}
+                    </span>
+                  ) : (
+                    <span style={{ color: tokens.colorNeutralForeground3 }}>no cap</span>
+                  )}
+                </span>
+              </div>
+            ))}
+            {licRows.length === 0 && (
+              <div style={{ padding: 16, color: tokens.colorNeutralForeground3, fontSize: 13 }}>
+                No agents on this funding model.
+              </div>
+            )}
+          </div>
+        )}
+        <div className={s.footnote} style={{ marginTop: 12 }}>
+          <Info16Regular /> Funding model is a derived view: prepaid-vs-PAYG is selected per
+          environment, zero-rating is resolved per caller (M365 Copilot–licensed users are
+          seat-covered), and per agent you set a spending cap. Agent 365 / E7 are a separate
+          governance seat — they don't fund credit consumption.
         </div>
       </Panel>
 

@@ -23,6 +23,8 @@ export type TimeRange = '7d' | '30d' | '90d';
 interface AppState {
   themeMode: ThemeMode;
   toggleTheme: () => void;
+  navCollapsed: boolean;
+  toggleNav: () => void;
   environment: EnvFilter;
   setEnvironment: (e: EnvFilter) => void;
   timeRange: TimeRange;
@@ -50,6 +52,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStored<ThemeMode>('aah.theme', 'light'),
   );
+  const [navCollapsed, setNavCollapsed] = useState<boolean>(
+    () => readStored<string>('aah.nav', 'false') === 'true',
+  );
   const [environment, setEnvironment] = useState<EnvFilter>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('90d');
   const [scenario, setScenarioState] = useState<ScenarioId>(() =>
@@ -65,6 +70,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [themeMode]);
 
   useEffect(() => {
+    localStorage.setItem('aah.nav', String(navCollapsed));
+  }, [navCollapsed]);
+
+  useEffect(() => {
     localStorage.setItem('aah.scenario', scenario);
   }, [scenario]);
 
@@ -72,6 +81,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     () => setThemeMode((m) => (m === 'light' ? 'dark' : 'light')),
     [],
   );
+  const toggleNav = useCallback(() => setNavCollapsed((v) => !v), []);
   const setScenario = useCallback((s: ScenarioId) => setScenarioState(s), []);
   const openAskWith = useCallback((question: string) => {
     setAskSeed(question);
@@ -84,6 +94,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     () => ({
       themeMode,
       toggleTheme,
+      navCollapsed,
+      toggleNav,
       environment,
       setEnvironment,
       timeRange,
@@ -101,6 +113,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [
       themeMode,
       toggleTheme,
+      navCollapsed,
+      toggleNav,
       environment,
       timeRange,
       scenario,
