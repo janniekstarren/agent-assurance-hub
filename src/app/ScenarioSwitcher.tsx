@@ -20,7 +20,7 @@ import type { ScenarioId } from '../types/domain';
 
 const useStyles = makeStyles({
   trigger: {
-    minWidth: '210px',
+    minWidth: '160px',
     justifyContent: 'space-between',
   },
   item: {
@@ -61,12 +61,9 @@ export function ScenarioSwitcher() {
           icon={<Beaker24Regular />}
           iconPosition="before"
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontWeight: 600 }}>Scenario:</span>
-            <Badge appearance="tint" color="brand" shape="rounded">
-              {current?.label ?? 'Healthy estate'}
-            </Badge>
-          </span>
+          <Badge appearance="tint" color="brand" shape="rounded">
+            {current?.label ?? 'Healthy estate'}
+          </Badge>
           <ChevronDown16Regular />
         </Button>
       </MenuTrigger>

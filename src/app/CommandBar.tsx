@@ -1,11 +1,9 @@
-/** Top command bar — page context on the left, global controls on the right:
-    environment filter, time-range, demo scenario switcher, Ask, theme toggle. */
+/** Top command bar — page context + persona on the left, global controls on the
+    right: environment filter, demo scenario switcher, Ask, theme toggle. */
 
 import {
   Button,
   Divider,
-  Dropdown,
-  Option,
   Tab,
   TabList,
   ToggleButton,
@@ -22,9 +20,10 @@ import {
 } from '@fluentui/react-icons';
 import { useLocation } from 'react-router-dom';
 import { useAppState } from './AppState';
-import type { EnvFilter, TimeRange } from './AppState';
+import type { EnvFilter } from './AppState';
 import { NAV_BY_PATH } from './navItems';
 import { ScenarioSwitcher } from './ScenarioSwitcher';
+import { PersonaSwitcher } from './PersonaSwitcher';
 
 const useStyles = makeStyles({
   bar: {
@@ -58,7 +57,6 @@ const useStyles = makeStyles({
     letterSpacing: '0.04em',
     color: tokens.colorNeutralForeground3,
   },
-  timeDropdown: { minWidth: '120px' },
 });
 
 const ENV_TABS: { value: EnvFilter; label: string }[] = [
@@ -68,12 +66,6 @@ const ENV_TABS: { value: EnvFilter; label: string }[] = [
   { value: 'prod', label: 'Prod' },
 ];
 
-const TIME_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: '7d', label: 'Last 7 days' },
-  { value: '30d', label: 'Last 30 days' },
-  { value: '90d', label: 'Last 90 days' },
-];
-
 export function CommandBar() {
   const s = useStyles();
   const { pathname } = useLocation();
@@ -81,8 +73,6 @@ export function CommandBar() {
   const {
     environment,
     setEnvironment,
-    timeRange,
-    setTimeRange,
     themeMode,
     toggleTheme,
     openAskWith,
@@ -107,6 +97,9 @@ export function CommandBar() {
         </span>
       </div>
 
+      <Divider vertical style={{ height: 28 }} />
+      <PersonaSwitcher />
+
       <div className={s.spacer} />
 
       <div className={s.controls}>
@@ -125,22 +118,6 @@ export function CommandBar() {
             ))}
           </TabList>
         </div>
-
-        <Divider vertical style={{ height: 28 }} />
-
-        <Dropdown
-          className={s.timeDropdown}
-          size="small"
-          selectedOptions={[timeRange]}
-          value={TIME_OPTIONS.find((o) => o.value === timeRange)?.label ?? ''}
-          onOptionSelect={(_e, d) => d.optionValue && setTimeRange(d.optionValue as TimeRange)}
-        >
-          {TIME_OPTIONS.map((o) => (
-            <Option key={o.value} value={o.value} text={o.label}>
-              {o.label}
-            </Option>
-          ))}
-        </Dropdown>
 
         <Divider vertical style={{ height: 28 }} />
 

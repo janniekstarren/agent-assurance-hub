@@ -8,8 +8,10 @@ import { motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../../app/AppState';
-import { getChatProvider, SUGGESTED_PROMPTS } from '../../services/chat';
+import { getChatProvider } from '../../services/chat';
 import type { ChatMessage, ChatTemplate, ChatTone } from '../../services/chat';
+import { PERSONA_BY_ID, PERSONA_PROMPTS } from '../../app/personas';
+import { useAgents } from '../../services/hooks';
 import type { Citation } from '../../types/domain';
 
 const useStyles = makeStyles({
@@ -121,8 +123,22 @@ const nextId = () => `m${++counter}`;
 export function ChatPanel({ seed, embedded }: { seed?: string | null; embedded?: boolean }) {
   const s = useStyles();
   const navigate = useNavigate();
-  const { setAskOpen } = useAppState();
+  const { setAskOpen, persona, ownerId } = useAppState();
+  const { data: agents } = useAgents();
   const provider = useMemo(() => getChatProvider(), []);
+
+  const prompts = useMemo(() => {
+    if (persona === 'agent-owner') {
+      const mine = (agents ?? []).filter((a) => a.owner.id === ownerId);
+      const names = [...new Set(mine.map((a) => a.displayName))].slice(0, 2);
+      return [
+        ...names.map((n) => `How is the ${n} performing?`),
+        'Are any of my agents drifting?',
+        'Which of my agents are pending approval?',
+      ];
+    }
+    return PERSONA_PROMPTS[persona];
+  }, [persona, ownerId, agents]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -215,10 +231,11 @@ export function ChatPanel({ seed, embedded }: { seed?: string | null; embedded?:
             </span>
             <span className={s.emptySub}>
               Natural-language questions over accuracy, safety, cost, lifecycle and Agent 365 —
-              answered with inline citations you can click through to the source.
+              answered with inline citations you can click through to the source. Suggestions are
+              tailored for the <strong>{PERSONA_BY_ID[persona].label}</strong> persona.
             </span>
             <div className={s.chips}>
-              {SUGGESTED_PROMPTS.map((p) => (
+              {prompts.map((p) => (
                 <Button key={p} appearance="outline" className={s.chip} onClick={() => send(p)}>
                   {p}
                 </Button>

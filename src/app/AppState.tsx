@@ -15,6 +15,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import type { Environment, ScenarioId } from '../types/domain';
+import type { PersonaId } from './personas';
 
 export type ThemeMode = 'light' | 'dark';
 export type EnvFilter = Environment | 'all';
@@ -25,6 +26,11 @@ interface AppState {
   toggleTheme: () => void;
   navCollapsed: boolean;
   toggleNav: () => void;
+  persona: PersonaId;
+  setPersona: (p: PersonaId) => void;
+  /** The owner the Agent Owner persona is "acting as". */
+  ownerId: string;
+  setOwnerId: (id: string) => void;
   environment: EnvFilter;
   setEnvironment: (e: EnvFilter) => void;
   timeRange: TimeRange;
@@ -55,6 +61,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [navCollapsed, setNavCollapsed] = useState<boolean>(
     () => readStored<string>('aah.nav', 'false') === 'true',
   );
+  const [persona, setPersonaState] = useState<PersonaId>(() =>
+    readStored<PersonaId>('aah.persona', 'executive'),
+  );
+  const [ownerId, setOwnerId] = useState<string>('u-marcus');
   const [environment, setEnvironment] = useState<EnvFilter>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('90d');
   const [scenario, setScenarioState] = useState<ScenarioId>(() =>
@@ -74,6 +84,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [navCollapsed]);
 
   useEffect(() => {
+    localStorage.setItem('aah.persona', persona);
+  }, [persona]);
+
+  useEffect(() => {
     localStorage.setItem('aah.scenario', scenario);
   }, [scenario]);
 
@@ -82,6 +96,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [],
   );
   const toggleNav = useCallback(() => setNavCollapsed((v) => !v), []);
+  const setPersona = useCallback((p: PersonaId) => setPersonaState(p), []);
   const setScenario = useCallback((s: ScenarioId) => setScenarioState(s), []);
   const openAskWith = useCallback((question: string) => {
     setAskSeed(question);
@@ -96,6 +111,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       toggleTheme,
       navCollapsed,
       toggleNav,
+      persona,
+      setPersona,
+      ownerId,
+      setOwnerId,
       environment,
       setEnvironment,
       timeRange,
@@ -115,6 +134,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       toggleTheme,
       navCollapsed,
       toggleNav,
+      persona,
+      setPersona,
+      ownerId,
       environment,
       timeRange,
       scenario,

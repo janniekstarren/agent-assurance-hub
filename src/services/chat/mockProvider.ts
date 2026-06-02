@@ -11,7 +11,7 @@ import type { Citation } from '../../types/domain';
 import { AGENTS } from '../../mock/agents';
 import { ALERTS } from '../../mock/alerts';
 import { BUDGETS, mtdCreditsFor } from '../../mock/costLedger';
-import { driftEventFor } from '../../mock/evalRuns';
+import { driftEventFor, latestEvalRun } from '../../mock/evalRuns';
 import { APPROVALS } from '../../mock/pipelines';
 import { AGENT365_RECORDS } from '../../mock/agent365';
 import { nf } from '../../utils/format';
@@ -262,6 +262,34 @@ function score(q: string, keywords: string[]): number {
   return keywords.reduce((n, k) => (lower.includes(k) ? n + 1 : n), 0);
 }
 
+/** Specific-agent status — answers "how is {agent} performing/doing?". */
+function agentStatus(q: string): ChatResult | null {
+  const lower = q.toLowerCase();
+  if (!/(how|perform|status|health|doing|about|score)/.test(lower)) return null;
+  const agent = AGENTS.find((a) => lower.includes(a.displayName.toLowerCase()));
+  if (!agent) return null;
+  const run = latestEvalRun(agent.schemaName, agent.environment);
+  const mtd = mtdCreditsFor(agent.schemaName, agent.environment);
+  return {
+    answer:
+      `**${agent.displayName} (${agent.environment.toUpperCase()})** — assurance ` +
+      `${agent.assuranceScore}/100, groundedness ${run.metrics.groundedness}%, quality gate ` +
+      `**${run.gateStatus}**. Month-to-date spend ${nf(mtd)} credits. Lifecycle: ${agent.lifecycleState}.`,
+    citations: [cite(`${agent.displayName} · Assurance`, `/assurance?agent=${agent.schemaName}`, 'agent')],
+    toolsUsed: ['query_evaluation', 'query_cost'],
+    template: {
+      kind: 'metrics',
+      title: `${agent.displayName} — status`,
+      metrics: [
+        { label: 'Assurance', value: `${agent.assuranceScore}`, tone: agent.assuranceScore >= 85 ? 'good' : agent.assuranceScore >= 70 ? 'warn' : 'bad' },
+        { label: 'Groundedness', value: `${run.metrics.groundedness}%`, tone: 'neutral' },
+        { label: 'Gate', value: run.gateStatus, tone: run.gateStatus === 'pass' ? 'good' : run.gateStatus === 'warn' ? 'warn' : 'bad' },
+        { label: 'MTD credits', value: nf(mtd), tone: 'neutral' },
+      ],
+    },
+  };
+}
+
 export class MockChatProvider implements ChatProvider {
   id = 'mock' as const;
   label = 'Mock (offline, deterministic)';
@@ -270,6 +298,8 @@ export class MockChatProvider implements ChatProvider {
   async ask(question: string): Promise<ChatResult> {
     // Simulate the tool-calling round-trip.
     await new Promise((r) => setTimeout(r, 360 + Math.random() * 320));
+    const status = agentStatus(question);
+    if (status) return status;
     let best: Handler | null = null;
     let bestScore = 0;
     for (const h of HANDLERS) {
