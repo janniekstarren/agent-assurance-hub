@@ -14,7 +14,7 @@ Built by **Engage Squared**. Brand accent `#165AF1`.
 
 | Module | What it shows |
 |---|---|
-| **Overview** | Estate health — KPI tiles (agents, assurance RAG, open alerts, MTD spend vs cap, pending approvals, live pulse), environment donut, governance zones, ranked "agents needing attention". |
+| **Overview** | Persona-aware dashboard with a view switcher. **MVP** (default) — lean: a plain-language status line, golden-question degradation per agent, and the few key issues, nothing else. **Executive** — board-level health / cost / risk. **IT Admin** — governance posture (alerts, shadow/risky agents, CA + registry coverage, approvals). **Agent Owner** — a "viewing as" picker scoping to your agents. |
 | **Agents** | Dense inventory grid across environments with a **lineage toggle** (group by `schemaName` across Dev/Test/Prod), and a slide-over **agent profile drawer** — the spine every module deep-links into. |
 | **Assurance** | Evaluation scores over time, the **Contract Checker drift** event, confidence distribution + threshold, regression test cases, and the quality-gates board with runbooks. |
 | **Safety** | Purview-style alert stream with triage, an alert type × agent heatmap, and metadata drill-in. The **Snowflake Data Agent** (oversharing + jailbreak) drives it. |

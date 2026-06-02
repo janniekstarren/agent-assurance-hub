@@ -62,7 +62,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     () => readStored<string>('aah.nav', 'false') === 'true',
   );
   const [persona, setPersonaState] = useState<PersonaId>(() =>
-    readStored<PersonaId>('aah.persona', 'executive'),
+    readStored<PersonaId>('aah.persona', 'mvp'),
   );
   const [ownerId, setOwnerId] = useState<string>('u-marcus');
   const [environment, setEnvironment] = useState<EnvFilter>('all');

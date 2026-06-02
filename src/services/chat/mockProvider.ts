@@ -37,6 +37,67 @@ const cite = (label: string, route: string, kind: Citation['kind']): Citation =>
 const HANDLERS: Handler[] = [
   {
     tool: 'query_evaluation',
+    keywords: ['degrad', 'golden', 'failing', 'against their golden', 'accuracy', 'accurate'],
+    run: () => {
+      const degrading = AGENTS.filter((a) => a.lifecycleState !== 'draft')
+        .map((a) => ({ a, run: latestEvalRun(a.schemaName, a.environment) }))
+        .filter((x) => x.run.testCases.some((c) => !c.passed) || (x.run.regression?.vsBaseline ?? 0) < -3);
+      if (degrading.length === 0)
+        return {
+          answer: 'All agents are passing their golden-question checks — no degradation detected.',
+          citations: [cite('Assurance', '/assurance', 'module')],
+          toolsUsed: ['query_evaluation'],
+        };
+      return {
+        answer:
+          `**${degrading.length} agent${degrading.length === 1 ? ' is' : 's are'} degrading against ` +
+          `${degrading.length === 1 ? 'its' : 'their'} golden questions:** ` +
+          `${degrading.map((x) => x.a.displayName).join(', ')}. The Construction Contract Checker ` +
+          `dropped 14 points after a knowledge-source change on 14 May.`,
+        citations: [cite('Construction Contract Checker · Assurance', '/assurance?agent=syd_contractChecker', 'agent')],
+        toolsUsed: ['query_evaluation'],
+        template: {
+          kind: 'list',
+          title: 'Degrading against golden questions',
+          items: degrading.map((x) => {
+            const total = x.run.testCases.length;
+            const failed = x.run.testCases.filter((c) => !c.passed).length;
+            const vs = x.run.regression?.vsBaseline ?? 0;
+            return {
+              title: `${x.a.displayName} (${x.a.environment.toUpperCase()})`,
+              detail: `${total - failed}/${total} golden questions passing · ${vs > 0 ? '+' : ''}${vs} pts vs baseline`,
+              badge: `${vs} pts`,
+              tone: 'bad' as const,
+            };
+          }),
+        },
+      };
+    },
+  },
+  {
+    tool: 'query_inventory',
+    keywords: ['issue', 'issues', 'problem', 'wrong', 'needs attention', 'top agent'],
+    run: () => ({
+      answer:
+        `**The estate's top issues right now:** the Airport Ops Copilot is ~129% over its budget ` +
+        `cap, the Snowflake Data Agent is leaking Confidential data, the Construction Contract ` +
+        `Checker is drifting (−14 pts), and a shadow Invoice Reconciliation Agent is running unmonitored.`,
+      citations: [cite('Estate overview', '/overview', 'module')],
+      toolsUsed: ['query_inventory', 'query_safety', 'query_budgets'],
+      template: {
+        kind: 'list',
+        title: 'Top issues',
+        items: [
+          { title: 'Airport Ops Copilot', detail: '~129% of budget cap', badge: 'over budget', tone: 'bad' },
+          { title: 'Snowflake Data Agent', detail: 'Oversharing + jailbreak attempt', badge: 'data leak', tone: 'bad' },
+          { title: 'Construction Contract Checker', detail: 'Drift −14 pts vs baseline', badge: 'drift', tone: 'warn' },
+          { title: 'Invoice Reconciliation Agent', detail: 'Shadow agent, unmonitored', badge: 'shadow', tone: 'bad' },
+        ],
+      },
+    }),
+  },
+  {
+    tool: 'query_evaluation',
     keywords: ['drift', 'drifting', 'groundedness', 'regress', 'regression', 'accuracy dropp'],
     run: () => {
       const drifting = AGENTS.filter((a) => driftEventFor(a.schemaName, a.environment));
@@ -265,7 +326,7 @@ function score(q: string, keywords: string[]): number {
 /** Specific-agent status — answers "how is {agent} performing/doing?". */
 function agentStatus(q: string): ChatResult | null {
   const lower = q.toLowerCase();
-  if (!/(how|perform|status|health|doing|about|score)/.test(lower)) return null;
+  if (!/(how|perform|status|health|doing|about|score|accurate|accuracy|degrad)/.test(lower)) return null;
   const agent = AGENTS.find((a) => lower.includes(a.displayName.toLowerCase()));
   if (!agent) return null;
   const run = latestEvalRun(agent.schemaName, agent.environment);

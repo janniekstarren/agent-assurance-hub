@@ -2,6 +2,7 @@ import { makeStyles, tokens } from '@fluentui/react-components';
 import { useAppState } from '../../app/AppState';
 import { PERSONA_BY_ID } from '../../app/personas';
 import { PageContainer } from '../../components/primitives';
+import { MvpView } from './MvpView';
 import { ExecutiveView } from './ExecutiveView';
 import { GovernanceView } from './GovernanceView';
 import { OwnerView } from './OwnerView';
@@ -40,6 +41,7 @@ export function OverviewPage() {
           <span className={s.tagline}>{p.tagline}</span>
         </span>
       </div>
+      {persona === 'mvp' && <MvpView />}
       {persona === 'executive' && <ExecutiveView />}
       {persona === 'it-admin' && <GovernanceView />}
       {persona === 'agent-owner' && <OwnerView />}

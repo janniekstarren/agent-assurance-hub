@@ -7,7 +7,14 @@
  * via Log Analytics KQL (per-agent, opt-in connection).
  */
 
-import type { AssuranceSummary, DriftEvent, Environment, GateStatus } from '../types/domain';
+import type {
+  AgentType,
+  AssuranceSummary,
+  DriftEvent,
+  Environment,
+  GateStatus,
+  TimePoint,
+} from '../types/domain';
 import { AGENTS } from '../mock/agents';
 import { driftEventFor, evalSeriesFor, latestEvalRun } from '../mock/evalRuns';
 import {
@@ -73,4 +80,56 @@ export async function getDriftEvents(): Promise<DriftEvent[]> {
     if (d) events.push(d);
   }
   return respond(events, { label: 'evaluation.drift' });
+}
+
+/**
+ * Golden-question status — each agent measured against its curated golden-set
+ * (the eval test cases), with pass rate, degradation vs the published baseline,
+ * and a groundedness trend. This is the core MVP signal: are agents still
+ * answering correctly?
+ */
+export interface GoldenStatus {
+  schemaName: string;
+  agentName: string;
+  environment: Environment;
+  type: AgentType;
+  total: number;
+  passed: number;
+  failed: number;
+  passRate: number;
+  groundedness: number;
+  vsBaseline: number;
+  degrading: boolean;
+  trend: TimePoint[];
+}
+
+export async function getGoldenStatus(): Promise<GoldenStatus[]> {
+  const rows: GoldenStatus[] = AGENTS.filter((a) => a.lifecycleState !== 'draft').map((a) => {
+    const run = latestEvalRun(a.schemaName, a.environment);
+    const series = evalSeriesFor(a.schemaName, a.environment);
+    const total = run.testCases.length;
+    const passed = run.testCases.filter((c) => c.passed).length;
+    const failed = total - passed;
+    const vsBaseline = run.regression?.vsBaseline ?? 0;
+    const degrading = failed > 0 || vsBaseline < -3;
+    const trend = series.filter((_p, i) => i % 4 === 0).map((p) => ({ date: p.date, value: p.groundedness }));
+    return {
+      schemaName: a.schemaName,
+      agentName: a.displayName,
+      environment: a.environment,
+      type: a.type,
+      total,
+      passed,
+      failed,
+      passRate: total ? Math.round((passed / total) * 100) : 100,
+      groundedness: run.metrics.groundedness,
+      vsBaseline,
+      degrading,
+      trend,
+    };
+  });
+  rows.sort((x, y) =>
+    x.degrading === y.degrading ? x.vsBaseline - y.vsBaseline : x.degrading ? -1 : 1,
+  );
+  return respond(rows, { label: 'evaluation.golden' });
 }

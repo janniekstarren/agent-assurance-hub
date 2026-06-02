@@ -2,9 +2,14 @@
     persona re-shapes the Overview and personalises the Ask assistant's prompts. */
 
 import type { ReactElement } from 'react';
-import { Bot24Regular, Briefcase24Regular, ShieldCheckmark24Regular } from '@fluentui/react-icons';
+import {
+  Bot24Regular,
+  Briefcase24Regular,
+  ShieldCheckmark24Regular,
+  Target24Regular,
+} from '@fluentui/react-icons';
 
-export type PersonaId = 'executive' | 'it-admin' | 'agent-owner';
+export type PersonaId = 'mvp' | 'executive' | 'it-admin' | 'agent-owner';
 
 export interface Persona {
   id: PersonaId;
@@ -15,6 +20,13 @@ export interface Persona {
 }
 
 export const PERSONAS: Persona[] = [
+  {
+    id: 'mvp',
+    label: 'MVP',
+    tagline: 'Just the essentials — accuracy against golden questions & key issues',
+    icon: <Target24Regular />,
+    accent: '#107C10',
+  },
   {
     id: 'executive',
     label: 'Executive',
@@ -49,6 +61,11 @@ export const PERSONA_BY_ID: Record<PersonaId, Persona> = PERSONAS.reduce(
 /** Default suggested prompts per persona. The Agent Owner set is replaced at
     runtime with prompts referencing the selected owner's own agents. */
 export const PERSONA_PROMPTS: Record<PersonaId, string[]> = {
+  mvp: [
+    'Which agents are degrading against their golden questions?',
+    'What are the top agent issues?',
+    'Is the Construction Contract Checker still accurate?',
+  ],
   executive: [
     'What is our estate assurance score?',
     'What did we spend on the Ops Copilot, and why?',

@@ -63,6 +63,9 @@ export function useQualityGates() {
 export function useDriftEvents() {
   return useQuery({ queryKey: ['drift'], queryFn: evaluation.getDriftEvents, staleTime: STALE });
 }
+export function useGoldenStatus() {
+  return useQuery({ queryKey: ['golden'], queryFn: evaluation.getGoldenStatus, staleTime: STALE });
+}
 
 // --- telemetry --------------------------------------------------------------
 export function useConfidence(schemaName: string, environment: Environment) {
