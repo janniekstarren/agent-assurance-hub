@@ -1,0 +1,13 @@
+{
+  "name": "agent-assurance-hub-api",
+  "version": "1.0.0",
+  "description": "Dormant Azure Static Web Apps managed function: the live Azure OpenAI / Azure AI Foundry chat proxy for Module 8 (Ask). OFF BY DEFAULT — the app uses MockChatProvider until this is enabled. See repo README, section 'Swap mock -> live'.",
+  "type": "module",
+  "main": "src/functions/chat.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0"
+  }
+}
