@@ -53,9 +53,19 @@ To connect a **new** Static Web App (Free): create the SWA in the Azure portal (
 
 The app is built so that going live is a contained change:
 
-1. **Data** — all reads flow through a **synthetic API** (`/src/services/synthetic/client.ts`): one module whose methods mirror the real Microsoft endpoints and return the **real response envelopes** — Azure Resource Graph `{ totalRecords, count, data }`, Log Analytics / App Insights `{ tables: [{ columns, rows }] }`, Dataverse / Graph OData `{ value }`, Cost Management `{ properties: { columns, rows } }`. The services *parse* those envelopes into the domain model exactly as they would parse a live response (see `rowToAgent` in `inventory.ts`, and the KQL→table→series parse in `telemetry.ts`). Going live = replace a method body in the synthetic client with a real `fetch()` to the documented URL; **services, hooks, components and types never change.**
+1. **Data** — all reads flow through a **synthetic API** (`/src/services/synthetic/client.ts`): one module whose methods mirror the real Microsoft endpoints and return the **real response envelopes**. Every observability service parses one of these into the domain model exactly as it would a live response:
 
-   This is also what stops *impossible* data: because the envelope enforces the real field names and shapes, the UI can only render what a real endpoint could actually return. A signal with no real source comes back empty/absent here too — the gap is structural, not hand-waved. (Worked examples wired through the client today: Resource Graph → inventory, Log Analytics KQL → the live pulse; the remaining endpoints expose the same surface and wire identically.)
+   | Endpoint (envelope) | Service · parser |
+   |---|---|
+   | Azure Resource Graph `{ totalRecords, count, data }` | `inventory.ts` · `rowToAgent` |
+   | Log Analytics / App Insights `{ tables: [{ columns, rows }] }` | `telemetry.ts` · KQL→table→series |
+   | Office 365 Management Activity (`Audit.AI` records) | `audit.ts` · `recordToAlert` |
+   | Dataverse OData `{ value }` (`cr_evaluationruns`) | `evaluation.ts` · `rowToEvalRun` |
+   | Cost Management + PPAC `{ properties: { columns, rows } }` | `cost.ts` · `rowToCostRecord` |
+
+   Going live = replace a method body in the synthetic client with a real `fetch()` to the documented URL; **services, hooks, components and types never change.**
+
+   This is also what stops *impossible* data: because the envelope enforces the real field names and shapes, the UI can only render what a real endpoint could actually return. A signal with no real source comes back empty/absent here too — the gap is structural, not hand-waved.
 2. **Chat** — Module 8 uses a pluggable `ChatProvider`. `MockChatProvider` (default) runs an offline tool-calling simulation over the local data. `AzureOpenAIChatProvider` (in `src/services/chat/`) posts the shared function-calling tool schemas to the SWA managed function `/api/chat`, which proxies Azure OpenAI / Azure AI Foundry so the key never reaches the browser. Enable it by:
    - setting `VITE_CHAT_PROVIDER=azure` (see `.env.example`),
    - setting `api_location: "api"` in the deploy workflow,
