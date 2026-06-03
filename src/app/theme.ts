@@ -43,7 +43,35 @@ export const appDarkTheme: Theme = {
   ...createDarkTheme(brand),
 };
 
-// Slightly deepen the dark canvas for the "never flat-and-grey" depth target.
-appDarkTheme.colorNeutralBackground1 = '#16171D';
-appDarkTheme.colorNeutralBackground2 = '#1C1D26';
-appDarkTheme.colorNeutralBackground3 = '#23242F';
+// --- Surfaces -------------------------------------------------------------
+// Cool the light canvas off flat grey so white cards lift against it; keep
+// card surfaces clean white for crisp contrast.
+appLightTheme.colorNeutralBackground2 = '#F4F6FB';
+appLightTheme.colorNeutralBackground3 = '#EAEEF6';
+
+// Deepen the dark canvas for the "never flat-and-grey" depth target.
+appDarkTheme.colorNeutralBackground1 = '#181A22';
+appDarkTheme.colorNeutralBackground2 = '#1E202B';
+appDarkTheme.colorNeutralBackground3 = '#121319';
+
+// --- Elevation ------------------------------------------------------------
+// Replace Fluent's flat grey shadows with soft, layered, indigo-tinted depth
+// (light) and deep glassy depth (dark). Cascades to every Panel / drawer.
+const LIGHT_SHADOWS = {
+  shadow2: '0 1px 2px rgba(16,23,64,0.05)',
+  shadow4: '0 1px 2px rgba(16,23,64,0.04), 0 4px 12px rgba(16,23,64,0.06)',
+  shadow8: '0 2px 4px rgba(16,23,64,0.04), 0 10px 26px rgba(16,23,64,0.09)',
+  shadow16: '0 4px 8px rgba(16,23,64,0.05), 0 20px 48px rgba(16,23,64,0.12)',
+  shadow28: '0 8px 16px rgba(16,23,64,0.07), 0 30px 72px rgba(16,23,64,0.16)',
+  shadow64: '0 16px 32px rgba(16,23,64,0.09), 0 50px 120px rgba(16,23,64,0.22)',
+} as const;
+const DARK_SHADOWS = {
+  shadow2: '0 1px 2px rgba(0,0,0,0.5)',
+  shadow4: '0 1px 3px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.42)',
+  shadow8: '0 2px 6px rgba(0,0,0,0.5), 0 12px 30px rgba(0,0,0,0.5)',
+  shadow16: '0 6px 14px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.6)',
+  shadow28: '0 10px 24px rgba(0,0,0,0.6), 0 36px 84px rgba(0,0,0,0.7)',
+  shadow64: '0 20px 48px rgba(0,0,0,0.72), 0 64px 150px rgba(0,0,0,0.82)',
+} as const;
+Object.assign(appLightTheme, LIGHT_SHADOWS);
+Object.assign(appDarkTheme, DARK_SHADOWS);

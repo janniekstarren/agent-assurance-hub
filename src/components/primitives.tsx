@@ -22,7 +22,7 @@ const useStyles = makeStyles({
   panel: {
     backgroundColor: tokens.colorNeutralBackground1,
     border: `1px solid ${tokens.colorNeutralStroke2}`,
-    borderRadius: tokens.borderRadiusXLarge,
+    borderRadius: '16px',
     boxShadow: tokens.shadow4,
     padding: '18px',
     position: 'relative',
@@ -30,12 +30,12 @@ const useStyles = makeStyles({
   interactive: {
     cursor: 'pointer',
     transitionProperty: 'transform, box-shadow, border-color',
-    transitionDuration: '160ms',
+    transitionDuration: '180ms',
     transitionTimingFunction: 'cubic-bezier(0.1,0.9,0.2,1)',
     ':hover': {
-      transform: 'translateY(-2px)',
+      transform: 'translateY(-3px)',
       boxShadow: tokens.shadow16,
-      border: `1px solid ${tokens.colorNeutralStroke1}`,
+      border: `1px solid ${tokens.colorBrandStroke2}`,
     },
   },
   selected: {
@@ -50,8 +50,8 @@ const useStyles = makeStyles({
     marginBottom: '4px',
   },
   sectionTitleText: { display: 'flex', flexDirection: 'column', gap: '2px' },
-  sectionH: { fontSize: '15px', fontWeight: 700, letterSpacing: '-0.01em', margin: 0 },
-  sectionCaption: { fontSize: '12px', color: tokens.colorNeutralForeground3 },
+  sectionH: { fontSize: '16px', fontWeight: 700, letterSpacing: '-0.018em', margin: 0 },
+  sectionCaption: { fontSize: '12px', color: tokens.colorNeutralForeground3, lineHeight: 1.4 },
   state: {
     display: 'flex',
     flexDirection: 'column',

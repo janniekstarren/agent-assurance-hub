@@ -1,7 +1,7 @@
 /** App shell — nav rail, command bar, scenario banner, animated page outlet and
     the global Ask drawer. */
 
-import { makeStyles, tokens } from '@fluentui/react-components';
+import { makeStyles } from '@fluentui/react-components';
 import { MotionConfig } from 'framer-motion';
 import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -20,7 +20,6 @@ const useStyles = makeStyles({
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: tokens.colorNeutralBackground3,
   },
   content: { flex: 1, minHeight: 0, position: 'relative' },
   page: { height: '100%' },
@@ -33,7 +32,7 @@ export function Layout() {
     <MotionConfig reducedMotion="user">
       <div className={s.root}>
         <NavRail />
-        <div className={s.main}>
+        <div className={`${s.main} app-canvas`}>
           <CommandBar />
           <ScenarioBanner />
           <main className={`${s.content} scroll-area`}>

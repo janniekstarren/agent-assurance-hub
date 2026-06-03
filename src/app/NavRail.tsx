@@ -5,6 +5,7 @@ import { makeStyles, mergeClasses, tokens, Tooltip } from '@fluentui/react-compo
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from './navItems';
 import { useAppState } from './AppState';
+import { BRAND_PRIMARY } from './theme';
 import { BrandGlyph, BrandMark } from '../components/BrandMark';
 
 const useStyles = makeStyles({
@@ -29,6 +30,7 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
+    '& svg': { filter: 'drop-shadow(0 3px 7px rgba(22,90,241,0.32))' },
   },
   brandCollapsed: { padding: 0, justifyContent: 'center' },
   nav: {
@@ -59,21 +61,23 @@ const useStyles = makeStyles({
   },
   itemCollapsed: { justifyContent: 'center', padding: '9px 0' },
   itemActive: {
-    backgroundColor: tokens.colorBrandBackground2,
     color: tokens.colorBrandForeground1,
+    fontWeight: 600,
+    backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${tokens.colorBrandBackground} 22%, transparent), color-mix(in srgb, ${tokens.colorBrandBackground} 7%, transparent))`,
     ':hover': {
-      backgroundColor: tokens.colorBrandBackground2,
       color: tokens.colorBrandForeground1,
+      backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${tokens.colorBrandBackground} 28%, transparent), color-mix(in srgb, ${tokens.colorBrandBackground} 10%, transparent))`,
     },
     '::before': {
       content: '""',
       position: 'absolute',
       left: '-10px',
-      top: '8px',
-      bottom: '8px',
+      top: '7px',
+      bottom: '7px',
       width: '3px',
       borderRadius: '0 3px 3px 0',
-      backgroundColor: tokens.colorBrandStroke1,
+      backgroundImage: `linear-gradient(180deg, #5C88F5, ${BRAND_PRIMARY})`,
+      boxShadow: `0 0 10px color-mix(in srgb, ${BRAND_PRIMARY} 55%, transparent)`,
     },
   },
   icon: { display: 'flex', fontSize: '20px', flexShrink: 0 },

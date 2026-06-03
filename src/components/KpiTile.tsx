@@ -58,7 +58,11 @@ const useStyles = makeStyles({
 
 function chipStyle(accent?: string): React.CSSProperties {
   return accent
-    ? { background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }
+    ? {
+        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 26%, transparent), color-mix(in srgb, ${accent} 9%, transparent))`,
+        color: accent,
+        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 24%, transparent)`,
+      }
     : { background: tokens.colorNeutralBackground4, color: tokens.colorNeutralForeground3 };
 }
 
