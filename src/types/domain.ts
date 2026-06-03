@@ -210,6 +210,13 @@ export interface Observability {
   /** How confidence is obtained, if at all. */
   confidence: 'classic-nlu' | 'derived' | 'none';
   level: TelemetryLevel;
+  /**
+   * Model traffic routed through the Azure API Management AI gateway — enforced
+   * token metrics, prompt/completion logging, token quotas and Content Safety.
+   * Only possible where you own the model-call path (Foundry / custom / BYO
+   * model); Copilot Studio's managed orchestrator calls do not traverse it.
+   */
+  gateway?: 'enforced' | 'none';
   note?: string;
 }
 

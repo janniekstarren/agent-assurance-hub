@@ -54,6 +54,16 @@ export const COLLECTION_METHODS: CollectionMethod[] = [
     constraint:
       'Opt-in per agent; only what the runtime emits. Foundry agents via OpenTelemetry; SharePoint / declarative agents emit little to nothing.',
   },
+  {
+    name: 'AI gateway control + metrics',
+    tool: 'Azure API Management (GenAI gateway)',
+    purpose:
+      'Fronts the model endpoints for Foundry / custom / MCP agents: emits per-consumer token metrics to App Insights (llm-emit-token-metric), logs prompts + completions to Azure Monitor, and enforces token quotas + inline Content Safety (llm-token-limit, llm-content-safety).',
+    feeds: 'Token-level cost · prompt/completion logs · inline content safety · circuit-breaker health',
+    status: 'recommended',
+    constraint:
+      "Only sees traffic routed through it — Foundry / custom-code / BYO-model / MCP agents. Copilot Studio + SharePoint agents call models via Microsoft's managed orchestrator, which does not traverse your gateway, so their internal model usage stays opaque. Foundry AI-gateway integration + unified model API are preview; capability set varies by APIM tier.",
+  },
 ];
 
 export const SIGNAL_COVERAGE: SignalCoverage[] = [
@@ -120,6 +130,15 @@ export const SIGNAL_COVERAGE: SignalCoverage[] = [
       'Metadata + sensitivity labels + Jailbreak / XPIA flags — NOT raw text. Non-Microsoft-channel agents need Purview pay-as-you-go to be captured.',
   },
   {
+    signal: 'Inline content safety',
+    route: '/safety',
+    source: 'APIM AI gateway — llm-content-safety (Azure AI Content Safety)',
+    status: 'GA',
+    coverage: 'requires-instrumentation',
+    caveat:
+      'Moderates prompts BEFORE the model call — prevention, not just Purview detection after the fact. Gateway-routed agents only (Foundry / custom / MCP); Copilot Studio relies on its built-in moderation + Purview audit.',
+  },
+  {
     signal: 'Cost & credits',
     route: '/cost',
     source: 'PPAC Copilot credit reports + Azure Cost Management',
@@ -127,6 +146,15 @@ export const SIGNAL_COVERAGE: SignalCoverage[] = [
     coverage: 'partial',
     caveat:
       'PPAC is per-agent / per-environment but daily-aggregated; Azure Cost Management is coarse with no per-agent breakdown.',
+  },
+  {
+    signal: 'Token-level cost telemetry',
+    route: '/cost',
+    source: 'APIM AI gateway — llm-emit-token-metric → App Insights / Azure Monitor',
+    status: 'GA',
+    coverage: 'requires-instrumentation',
+    caveat:
+      'Per-consumer prompt/completion token metrics, but only for agents whose model calls route through the gateway (Foundry / custom / BYO-model). Copilot Studio managed calls are not gateway-visible — PPAC credit reports remain the only source there.',
   },
   {
     signal: 'Multi-environment ALM',

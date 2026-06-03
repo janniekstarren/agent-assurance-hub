@@ -73,7 +73,7 @@ const useStyles = makeStyles({
   pill: { display: 'inline-flex', alignItems: 'center', padding: '2px 9px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, border: '1px solid', whiteSpace: 'nowrap', width: 'fit-content' },
   obsHead: {
     display: 'grid',
-    gridTemplateColumns: '1.6fr 0.7fr 0.9fr 0.9fr 1fr 1fr',
+    gridTemplateColumns: '1.5fr 0.6fr 0.85fr 0.85fr 0.9fr 0.9fr 0.95fr',
     gap: '12px',
     padding: '4px 12px',
     fontSize: '10.5px',
@@ -81,17 +81,17 @@ const useStyles = makeStyles({
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
     color: tokens.colorNeutralForeground3,
-    minWidth: '820px',
+    minWidth: '960px',
   },
   obsRow: {
     display: 'grid',
-    gridTemplateColumns: '1.6fr 0.7fr 0.9fr 0.9fr 1fr 1fr',
+    gridTemplateColumns: '1.5fr 0.6fr 0.85fr 0.85fr 0.9fr 0.9fr 0.95fr',
     gap: '12px',
     padding: '11px 12px',
     borderTop: `1px solid ${tokens.colorNeutralStroke3}`,
     fontSize: '12.5px',
     alignItems: 'center',
-    minWidth: '820px',
+    minWidth: '960px',
   },
   obsName: { display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 },
   obsNameText: { fontWeight: 600 },
@@ -214,6 +214,7 @@ export function CoveragePage() {
             <span>Evaluation</span>
             <span>Confidence</span>
             <span>Telemetry</span>
+            <span>Gateway</span>
           </div>
           {agents.data.map((a) => (
             <motion.div
@@ -236,6 +237,15 @@ export function CoveragePage() {
               <span>
                 <Pill label={LEVEL_META[a.level].label} color={LEVEL_META[a.level].color} />
               </span>
+              <span>
+                {a.gateway === 'enforced' ? (
+                  <Pill label="Enforced" color="#165AF1" />
+                ) : a.gateway === 'observed' ? (
+                  <span style={{ fontSize: 12, color: tokens.colorNeutralForeground3 }}>Observed</span>
+                ) : (
+                  <span style={{ color: tokens.colorNeutralForeground4 }}>—</span>
+                )}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -244,7 +254,11 @@ export function CoveragePage() {
           <span>
             Classic-NLU agents expose recognition confidence but not generative groundedness.
             Uninstrumented agents are governance-metadata-only. Shadow agents have no observability —
-            which is exactly why they are a risk.
+            which is exactly why they are a risk. <strong>Gateway: Enforced</strong> means the agent's
+            model calls route through the Azure API Management AI gateway (gateway-grade token metrics,
+            token quotas and inline Content Safety); <strong>Observed</strong> is passive App Insights
+            only. Copilot Studio's managed model calls cannot be gateway-fronted, so they are
+            observe-only at best.
           </span>
         </div>
       </Panel>
