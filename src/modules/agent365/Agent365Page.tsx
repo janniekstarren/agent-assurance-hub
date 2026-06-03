@@ -62,7 +62,20 @@ const useStyles = makeStyles({
   regShadow: { border: `1px solid ${tokens.colorPaletteRedBorder2}`, background: tokens.colorStatusDangerBackground1 },
   regName: { fontWeight: 600, fontSize: '13px' },
   mono: { fontFamily: 'ui-monospace, Consolas, monospace', fontSize: '11px', color: tokens.colorNeutralForeground3 },
-  regRight: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' },
+  // Fixed columns so the Conditional-Access icon, risk and registry badges line
+  // up across every row regardless of the optional status tag or badge widths.
+  regRight: {
+    marginLeft: 'auto',
+    display: 'grid',
+    gridTemplateColumns: '62px 20px 66px 112px',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  rrStatus: { display: 'flex', justifyContent: 'flex-end' },
+  rrCA: { display: 'flex', justifyContent: 'center' },
+  rrRisk: { display: 'flex', justifyContent: 'flex-start' },
+  rrReg: { display: 'flex', justifyContent: 'flex-start' },
   riskCard: { padding: '12px', borderRadius: tokens.borderRadiusLarge, border: `1px solid ${tokens.colorNeutralStroke2}`, marginBottom: '10px', backgroundColor: tokens.colorNeutralBackground1 },
   riskDetections: { margin: '6px 0 0', paddingLeft: '16px', fontSize: '12px', lineHeight: 1.6, color: tokens.colorNeutralForeground2 },
   cardGrid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(228px, 1fr))', gap: '12px', marginTop: '10px' },
@@ -208,18 +221,26 @@ export function Agent365Page() {
                   )}
                 </div>
                 <div className={s.regRight}>
-                  {r.external && r.statusTag && <StatusTagBadge tag={r.statusTag} />}
-                  {r.conditionalAccess ? (
-                    <Tooltip content="Conditional Access enforced" relationship="label">
-                      <CheckmarkCircle16Filled style={{ color: tokens.colorStatusSuccessForeground1 }} />
-                    </Tooltip>
-                  ) : (
-                    <Tooltip content="No Conditional Access enforced" relationship="label">
-                      <Warning16Filled style={{ color: tokens.colorStatusWarningForeground1 }} />
-                    </Tooltip>
-                  )}
-                  <RiskBadge level={r.riskLevel} />
-                  <RegistryBadge status={r.registryStatus} />
+                  <span className={s.rrStatus}>
+                    {r.external && r.statusTag && <StatusTagBadge tag={r.statusTag} />}
+                  </span>
+                  <span className={s.rrCA}>
+                    {r.conditionalAccess ? (
+                      <Tooltip content="Conditional Access enforced" relationship="label">
+                        <CheckmarkCircle16Filled style={{ color: tokens.colorStatusSuccessForeground1 }} />
+                      </Tooltip>
+                    ) : (
+                      <Tooltip content="No Conditional Access enforced" relationship="label">
+                        <Warning16Filled style={{ color: tokens.colorStatusWarningForeground1 }} />
+                      </Tooltip>
+                    )}
+                  </span>
+                  <span className={s.rrRisk}>
+                    <RiskBadge level={r.riskLevel} />
+                  </span>
+                  <span className={s.rrReg}>
+                    <RegistryBadge status={r.registryStatus} />
+                  </span>
                 </div>
               </motion.div>
             ))}
