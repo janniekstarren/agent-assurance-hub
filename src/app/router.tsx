@@ -13,6 +13,7 @@ const SafetyPage = lazy(() => import('../modules/safety/SafetyPage').then((m) =>
 const CostPage = lazy(() => import('../modules/cost/CostPage').then((m) => ({ default: m.CostPage })));
 const LifecyclePage = lazy(() => import('../modules/lifecycle/LifecyclePage').then((m) => ({ default: m.LifecyclePage })));
 const Agent365Page = lazy(() => import('../modules/agent365/Agent365Page').then((m) => ({ default: m.Agent365Page })));
+const CoveragePage = lazy(() => import('../modules/coverage/CoveragePage').then((m) => ({ default: m.CoveragePage })));
 const AskPage = lazy(() => import('../modules/ask/AskPage').then((m) => ({ default: m.AskPage })));
 
 export const router = createBrowserRouter([
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'cost', element: <CostPage /> },
       { path: 'lifecycle', element: <LifecyclePage /> },
       { path: 'agent365', element: <Agent365Page /> },
+      { path: 'coverage', element: <CoveragePage /> },
       { path: 'ask', element: <AskPage /> },
       { path: '*', element: <Navigate to="/overview" replace /> },
     ],

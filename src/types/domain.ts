@@ -192,15 +192,61 @@ export interface DriftEvent {
   groundednessAfter: number;
 }
 
+/**
+ * Per-agent observability coverage. Quality signals are NOT uniformly available
+ * — they depend on the agent being instrumented (App Insights connected) and on
+ * an evaluation suite being configured. Confidence for generative answers is not
+ * a native Copilot Studio API; it is derived from App Insights custom events.
+ * Classic-NLU agents expose recognition confidence but not generative
+ * groundedness. SharePoint/declarative and shadow agents are metadata-only / none.
+ */
+export type TelemetryLevel = 'full' | 'classic' | 'runtime' | 'metadata' | 'none';
+
+export interface Observability {
+  /** Application Insights connected to the agent (opt-in). */
+  appInsights: boolean;
+  /** Agent Evaluation API configured against a golden set. */
+  evaluation: boolean;
+  /** How confidence is obtained, if at all. */
+  confidence: 'classic-nlu' | 'derived' | 'none';
+  level: TelemetryLevel;
+  note?: string;
+}
+
 export interface AssuranceSummary {
   schemaName: string;
   environment: Environment;
+  observability: Observability;
+  /** Empty when no evaluation suite is configured. */
   evalSeries: EvalMetricPoint[];
+  /** Empty when confidence is not available. */
   confidenceSeries: ConfidencePoint[];
   confidenceHistogram: ConfidenceBin[];
   confidenceThreshold: number;
-  latestRun: EvalRun;
+  /** Undefined when no evaluation suite is configured. */
+  latestRun?: EvalRun;
   drift?: DriftEvent;
+}
+
+// ---------------------------------------------------------------------------
+// Data-source coverage (the honesty matrix)
+// ---------------------------------------------------------------------------
+
+export type CoverageStatus = 'GA' | 'preview' | 'beta';
+export type CoverageLevel =
+  | 'full'
+  | 'partial'
+  | 'metadata-only'
+  | 'requires-instrumentation'
+  | 'preview';
+
+export interface SignalCoverage {
+  signal: string;
+  route: string;
+  source: string;
+  status: CoverageStatus;
+  coverage: CoverageLevel;
+  caveat: string;
 }
 
 // ---------------------------------------------------------------------------

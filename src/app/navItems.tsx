@@ -6,6 +6,7 @@ import {
   Bot24Regular,
   Building24Regular,
   ChatSparkle24Regular,
+  Database24Regular,
   DataTrending24Regular,
   Money24Regular,
   ShieldCheckmark24Regular,
@@ -61,6 +62,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Agent 365',
     description: 'Registry & security context',
     icon: <Building24Regular />,
+  },
+  {
+    path: '/coverage',
+    label: 'Coverage',
+    description: 'Data sources & telemetry gaps',
+    icon: <Database24Regular />,
   },
   {
     path: '/ask',

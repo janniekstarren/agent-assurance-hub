@@ -15,7 +15,7 @@ import type {
   GateStatus,
   TimePoint,
 } from '../types/domain';
-import { AGENTS } from '../mock/agents';
+import { AGENTS, observabilityFor } from '../mock/agents';
 import { driftEventFor, evalSeriesFor, latestEvalRun } from '../mock/evalRuns';
 import {
   confidenceHistogram,
@@ -28,15 +28,19 @@ export async function getAssuranceSummary(
   schemaName: string,
   environment: Environment,
 ): Promise<AssuranceSummary> {
+  const obs = observabilityFor(schemaName);
+  const hasEval = obs.evaluation;
+  const hasConfidence = obs.confidence !== 'none';
   const summary: AssuranceSummary = {
     schemaName,
     environment,
-    evalSeries: evalSeriesFor(schemaName, environment),
-    confidenceSeries: confidenceSeriesFor(schemaName, environment),
-    confidenceHistogram: confidenceHistogram(schemaName, environment),
+    observability: obs,
+    evalSeries: hasEval ? evalSeriesFor(schemaName, environment) : [],
+    confidenceSeries: hasConfidence ? confidenceSeriesFor(schemaName, environment) : [],
+    confidenceHistogram: hasConfidence ? confidenceHistogram(schemaName, environment) : [],
     confidenceThreshold: confidenceThreshold(schemaName),
-    latestRun: latestEvalRun(schemaName, environment),
-    drift: driftEventFor(schemaName, environment),
+    latestRun: hasEval ? latestEvalRun(schemaName, environment) : undefined,
+    drift: hasEval ? driftEventFor(schemaName, environment) : undefined,
   };
   return respond(summary, { label: 'evaluation.summary' });
 }
@@ -55,7 +59,9 @@ export interface QualityGate {
 }
 
 export async function getQualityGates(): Promise<QualityGate[]> {
-  const gates: QualityGate[] = AGENTS.filter((a) => a.lifecycleState !== 'draft').map((a) => {
+  const gates: QualityGate[] = AGENTS.filter(
+    (a) => a.lifecycleState !== 'draft' && observabilityFor(a.schemaName).evaluation,
+  ).map((a) => {
     const run = latestEvalRun(a.schemaName, a.environment);
     return {
       schemaName: a.schemaName,
@@ -104,7 +110,9 @@ export interface GoldenStatus {
 }
 
 export async function getGoldenStatus(): Promise<GoldenStatus[]> {
-  const rows: GoldenStatus[] = AGENTS.filter((a) => a.lifecycleState !== 'draft').map((a) => {
+  const rows: GoldenStatus[] = AGENTS.filter(
+    (a) => a.lifecycleState !== 'draft' && observabilityFor(a.schemaName).evaluation,
+  ).map((a) => {
     const run = latestEvalRun(a.schemaName, a.environment);
     const series = evalSeriesFor(a.schemaName, a.environment);
     const total = run.testCases.length;

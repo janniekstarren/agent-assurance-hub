@@ -40,7 +40,7 @@ import {
   SectionTitle,
 } from '../../components/primitives';
 import { useAgents, useAssuranceSummary, useQualityGates } from '../../services/hooks';
-import type { Agent } from '../../types/domain';
+import type { Agent, Observability, TelemetryLevel } from '../../types/domain';
 import { dateShort, pct } from '../../utils/format';
 
 const useStyles = makeStyles({
@@ -58,6 +58,17 @@ const useStyles = makeStyles({
     background: tokens.colorStatusWarningBackground1,
     color: tokens.colorStatusWarningForeground2,
     marginBottom: '12px',
+  },
+  confNote: {
+    display: 'flex',
+    gap: '10px',
+    alignItems: 'flex-start',
+    padding: '10px 14px',
+    borderRadius: tokens.borderRadiusLarge,
+    background: tokens.colorStatusWarningBackground1,
+    color: tokens.colorStatusWarningForeground2,
+    fontSize: '12px',
+    lineHeight: 1.45,
   },
   cases: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' },
   caseRow: {
@@ -172,15 +183,29 @@ function AgentAssurance({ agent }: { agent: Agent }) {
   const { data, isLoading } = useAssuranceSummary(agent.schemaName, agent.environment);
   if (isLoading || !data) return <Panel><LoadingState /></Panel>;
 
+  const obs = data.observability;
+  const run = data.latestRun;
+  const hasEval = data.evalSeries.length > 0 && !!run;
+  const hasConfidence = data.confidenceSeries.length > 0;
+  const confLabel =
+    obs.confidence === 'classic-nlu' ? 'Recognition confidence (classic NLU)' : 'Mean confidence';
   const breaches = data.confidenceSeries.filter((p) => p.mean < data.confidenceThreshold).length;
 
   return (
     <>
+      <ObsBanner obs={obs} />
+
       <Panel>
         <SectionTitle
           title="Evaluation scores — 90 days"
-          caption="Groundedness, relevance, completeness and abstention from agent-evaluation runs."
+          caption={
+            obs.confidence === 'classic-nlu'
+              ? 'Generative groundedness does not apply to classic-NLU (scripted) answers.'
+              : "Groundedness, relevance, completeness and abstention from the agent's evaluation runs (golden set)."
+          }
         />
+        {hasEval ? (
+          <>
         {data.drift && (
           <div className={s.driftCallout}>
             <Warning20Filled />
@@ -246,12 +271,17 @@ function AgentAssurance({ agent }: { agent: Agent }) {
             </span>
           ))}
         </div>
+          </>
+        ) : (
+          <NotAvailable obs={obs} signal="Evaluation & groundedness" />
+        )}
       </Panel>
 
+      {hasConfidence ? (
       <div className={s.grid2}>
         <Panel>
           <SectionTitle
-            title="Confidence — mean over time"
+            title={confLabel + ' — over time'}
             caption={`Threshold ${data.confidenceThreshold}. ${breaches} day(s) below threshold.`}
           />
           <div style={{ width: '100%', height: 220 }}>
@@ -318,37 +348,55 @@ function AgentAssurance({ agent }: { agent: Agent }) {
           </div>
         </Panel>
       </div>
+      ) : (
+        <Panel>
+          <SectionTitle title="Confidence" />
+          <NotAvailable obs={obs} signal="Confidence" />
+        </Panel>
+      )}
 
+      {hasConfidence && (
+        <div className={s.confNote}>
+          <Warning20Filled style={{ flexShrink: 0 }} />
+          <span>
+            Generative-answer confidence is <strong>not a native Copilot Studio API</strong> — it is
+            derived from Application Insights custom events the agent emits. Classic-NLU agents
+            expose recognition confidence directly.
+          </span>
+        </div>
+      )}
+
+      {run && (
       <Panel>
         <SectionTitle
           title="Regression vs baseline"
-          caption="The latest evaluation run's test cases against the published baseline."
+          caption="The latest evaluation run's golden-question set against the published baseline."
         />
-        {data.latestRun.regression && (
+        {run.regression && (
           <div className={s.regSummary}>
             <span className={s.regChip}>
               <span className={s.regNum} style={{ color: chart.success }}>
-                {data.latestRun.regression.passed}
+                {run.regression.passed}
               </span>{' '}
               passed
             </span>
             <span className={s.regChip}>
               <span className={s.regNum} style={{ color: chart.danger }}>
-                {data.latestRun.regression.failed}
+                {run.regression.failed}
               </span>{' '}
               failed
             </span>
             <span className={s.regChip}>
-              <span className={s.regNum} style={{ color: data.latestRun.regression.vsBaseline < 0 ? chart.danger : chart.success }}>
-                {data.latestRun.regression.vsBaseline > 0 ? '+' : ''}
-                {data.latestRun.regression.vsBaseline}
+              <span className={s.regNum} style={{ color: run.regression.vsBaseline < 0 ? chart.danger : chart.success }}>
+                {run.regression.vsBaseline > 0 ? '+' : ''}
+                {run.regression.vsBaseline}
               </span>{' '}
               pts vs baseline
             </span>
           </div>
         )}
         <div className={s.cases}>
-          {data.latestRun.testCases.map((c) => (
+          {run.testCases.map((c) => (
             <motion.div
               key={c.id}
               className={s.caseRow}
@@ -371,7 +419,57 @@ function AgentAssurance({ agent }: { agent: Agent }) {
           ))}
         </div>
       </Panel>
+      )}
     </>
+  );
+}
+
+const LEVEL_META: Record<TelemetryLevel, { label: string; color: string; desc: string }> = {
+  full: { label: 'Full telemetry', color: '#107C10', desc: 'App Insights connected + evaluation suite configured.' },
+  runtime: { label: 'Runtime only', color: '#B88217', desc: 'Instrumented, but no evaluation suite — groundedness unavailable.' },
+  classic: { label: 'Classic NLU', color: '#0F6CBD', desc: 'Recognition confidence available; generative groundedness not applicable.' },
+  metadata: { label: 'Metadata only', color: '#D83B01', desc: 'Not instrumented — only Purview governance metadata.' },
+  none: { label: 'No observability', color: '#C50F1F', desc: 'Shadow / unmonitored — no telemetry.' },
+};
+
+function ObsBanner({ obs }: { obs: Observability }) {
+  const m = LEVEL_META[obs.level];
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '10px 14px',
+        borderRadius: 10,
+        fontSize: 12.5,
+        border: `1px solid color-mix(in srgb, ${m.color} 35%, transparent)`,
+        background: `color-mix(in srgb, ${m.color} 9%, transparent)`,
+      }}
+    >
+      <span style={{ width: 9, height: 9, borderRadius: 999, background: m.color, flexShrink: 0 }} />
+      <span>
+        <strong style={{ color: m.color }}>Telemetry: {m.label}.</strong> {obs.note ?? m.desc}
+      </span>
+    </div>
+  );
+}
+
+function NotAvailable({ obs, signal }: { obs: Observability; signal: string }) {
+  const needsInstrumentation = obs.level === 'metadata' || obs.level === 'runtime';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '34px 20px', textAlign: 'center' }}>
+      <Warning20Filled style={{ fontSize: 26, color: tokens.colorNeutralForeground4 }} />
+      <div style={{ fontWeight: 700, fontSize: 14 }}>{signal} not available</div>
+      <div style={{ fontSize: 12.5, color: tokens.colorNeutralForeground3, maxWidth: 440, lineHeight: 1.5 }}>
+        {obs.note ?? 'No telemetry available for this agent.'}
+      </div>
+      {needsInstrumentation && (
+        <div style={{ fontSize: 11.5, color: tokens.colorNeutralForeground4, maxWidth: 440 }}>
+          Connect Application Insights and configure an evaluation suite (golden set) to populate this.
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
-import { makeStyles, tokens } from '@fluentui/react-components';
-import { CheckmarkCircle24Filled, Warning24Filled } from '@fluentui/react-icons';
+import { Button, makeStyles, tokens } from '@fluentui/react-components';
+import { ArrowExportRegular, CheckmarkCircle24Filled, Warning24Filled } from '@fluentui/react-icons';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { KpiTile } from '../../components/KpiTile';
@@ -7,7 +7,7 @@ import { Sparkline } from '../../components/Sparkline';
 import { AgentTypeBadge } from '../../components/AgentTypeBadge';
 import { EnvBadge } from '../../components/badges';
 import { ErrorState, LoadingState, Panel, SectionTitle } from '../../components/primitives';
-import { useEstateOverview, useGoldenStatus } from '../../services/hooks';
+import { useAgents, useEstateOverview, useGoldenStatus } from '../../services/hooks';
 import { AttentionList, item, stagger } from './shared';
 
 const useStyles = makeStyles({
@@ -53,20 +53,25 @@ export function MvpView() {
   const navigate = useNavigate();
   const golden = useGoldenStatus();
   const overview = useEstateOverview();
+  const { data: agents } = useAgents();
 
   if (golden.isLoading || overview.isLoading) return <LoadingState label="Checking golden questions…" />;
   if (golden.isError || !golden.data || !overview.data) return <ErrorState onRetry={() => golden.refetch()} />;
 
-  const total = golden.data.length;
+  const evaluated = golden.data.length;
   const degrading = golden.data.filter((g) => g.degrading);
-  const onTrack = total - degrading.length;
+  const onTrack = evaluated - degrading.length;
+  const nonDraft = (agents ?? []).filter((a) => a.lifecycleState !== 'draft').length;
+  const noTelemetry = Math.max(0, nonDraft - evaluated);
   const issues = overview.data.attention;
   const allClear = degrading.length === 0 && issues.length === 0;
 
   const statusColor = allClear ? '#107C10' : degrading.length ? '#C50F1F' : '#B88217';
-  const statusText = `${onTrack} of ${total} agents are answering correctly against their golden questions.${
-    degrading.length ? ` ${degrading.length} ${degrading.length === 1 ? 'is' : 'are'} degrading.` : ''
-  }${issues.length ? ` ${issues.length} issue${issues.length === 1 ? '' : 's'} need attention.` : ''}`;
+  const statusText =
+    `${onTrack} of ${evaluated} evaluated agents are answering correctly against their golden questions.` +
+    `${degrading.length ? ` ${degrading.length} ${degrading.length === 1 ? 'is' : 'are'} degrading.` : ''}` +
+    `${noTelemetry ? ` ${noTelemetry} ${noTelemetry === 1 ? 'agent has' : 'agents have'} no quality telemetry.` : ''}` +
+    `${issues.length ? ` ${issues.length} issue${issues.length === 1 ? '' : 's'} need attention.` : ''}`;
 
   return (
     <>
@@ -79,10 +84,13 @@ export function MvpView() {
 
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="On track" value={onTrack} suffix={`/ ${total}`} accent="#107C10" caption="passing golden questions" onClick={() => navigate('/assurance')} />
+          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" caption="passing golden questions" onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
           <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : undefined} caption="below baseline accuracy" onClick={() => navigate('/assurance')} />
+        </motion.div>
+        <motion.div variants={item} className={s.cell}>
+          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : undefined} caption="not instrumented / evaluated" onClick={() => navigate('/coverage')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
           <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : undefined} caption="need attention" onClick={() => navigate('/safety')} />
@@ -91,7 +99,15 @@ export function MvpView() {
 
       <div className={s.split}>
         <Panel>
-          <SectionTitle title="Accuracy against golden questions" caption="Each agent's curated golden-set pass rate and groundedness trend. Degrading agents first." />
+          <SectionTitle
+            title="Accuracy against golden questions"
+            caption={`Only agents with an evaluation suite configured appear here${noTelemetry ? ` — ${noTelemetry} more have no quality telemetry` : ''}. Degrading agents first.`}
+            actions={
+              <Button size="small" appearance="subtle" icon={<ArrowExportRegular />} iconPosition="after" onClick={() => navigate('/coverage')}>
+                Coverage
+              </Button>
+            }
+          />
           <div className={s.gHead}>
             <span>Agent</span>
             <span>Golden questions</span>

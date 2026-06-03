@@ -16,6 +16,7 @@ import * as cost from './cost';
 import type { CostFilter } from './cost';
 import * as lifecycle from './lifecycle';
 import * as agent365 from './agent365';
+import * as coverage from './coverage';
 import { getEstateOverview } from './overview';
 
 const STALE = 5 * 60 * 1000;
@@ -195,6 +196,18 @@ export function useRegistrySummary() {
   return useQuery({
     queryKey: ['registry-summary'],
     queryFn: agent365.getRegistrySummary,
+    staleTime: STALE,
+  });
+}
+
+// --- coverage ---------------------------------------------------------------
+export function useSignalCoverage() {
+  return useQuery({ queryKey: ['coverage-signals'], queryFn: coverage.getSignalCoverage, staleTime: STALE });
+}
+export function useAgentObservability() {
+  return useQuery({
+    queryKey: ['coverage-agents'],
+    queryFn: coverage.getAgentObservability,
     staleTime: STALE,
   });
 }

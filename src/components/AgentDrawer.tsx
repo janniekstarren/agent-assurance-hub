@@ -56,6 +56,7 @@ import { AgentTypeBadge } from './AgentTypeBadge';
 import { ChartTooltip, useChartTheme } from './charts';
 import { LoadingState } from './primitives';
 import { featureLabel } from '../mock/creditWeights';
+import { observabilityFor } from '../mock/agents';
 import {
   ENV_LABEL,
   compactCredits,
@@ -247,6 +248,20 @@ function SummaryTab({ agent }: { agent: Agent }) {
           </Field>
           <Field label="Managed">{agent.isManaged ? 'Yes' : 'No'}</Field>
           <Field label="Quarantined">{agent.isQuarantined ? 'Yes' : 'No'}</Field>
+          <Field label="Telemetry coverage">
+            {(() => {
+              const lv = observabilityFor(agent.schemaName).level;
+              return lv === 'full'
+                ? 'Full (instrumented + evaluated)'
+                : lv === 'runtime'
+                  ? 'Runtime only'
+                  : lv === 'classic'
+                    ? 'Classic NLU (recognition)'
+                    : lv === 'metadata'
+                      ? 'Metadata only'
+                      : 'None (shadow)';
+            })()}
+          </Field>
         </div>
       </div>
 
@@ -317,25 +332,32 @@ function AssuranceTab({ agent, onClose }: { agent: Agent; onClose: () => void })
   const chart = useChartTheme();
   const { data, isLoading } = useAssuranceSummary(agent.schemaName, agent.environment);
   if (isLoading || !data) return <LoadingState />;
-  const last = data.latestRun.metrics;
+  const obs = data.observability;
+  const run = data.latestRun;
   return (
     <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, fontSize: 11.5, background: tokens.colorNeutralBackground2 }}>
+        <span style={{ width: 8, height: 8, borderRadius: 999, background: run ? '#107C10' : '#D83B01', flexShrink: 0 }} />
+        <span>{obs.note ?? (run ? 'Full telemetry — instrumented and evaluated.' : 'Limited telemetry.')}</span>
+      </div>
+      {run ? (
+        <>
       <div className={s.statRow}>
         <div className={s.stat}>
-          <div className={s.statNum}>{pct(last.groundedness)}</div>
+          <div className={s.statNum}>{pct(run.metrics.groundedness)}</div>
           <div className={s.statLabel}>Groundedness</div>
         </div>
         <div className={s.stat}>
-          <div className={s.statNum}>{pct(last.relevance)}</div>
+          <div className={s.statNum}>{pct(run.metrics.relevance)}</div>
           <div className={s.statLabel}>Relevance</div>
         </div>
         <div className={s.stat}>
-          <div className={s.statNum}>{pct(last.completeness)}</div>
+          <div className={s.statNum}>{pct(run.metrics.completeness)}</div>
           <div className={s.statLabel}>Completeness</div>
         </div>
         <div className={s.stat}>
           <div style={{ marginTop: 2 }}>
-            <GateBadge status={data.latestRun.gateStatus} />
+            <GateBadge status={run.gateStatus} />
           </div>
           <div className={s.statLabel} style={{ marginTop: 6 }}>
             Quality gate
@@ -386,6 +408,15 @@ function AssuranceTab({ agent, onClose }: { agent: Agent; onClose: () => void })
           </ResponsiveContainer>
         </div>
       </div>
+        </>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '28px 16px', textAlign: 'center' }}>
+          <span style={{ fontWeight: 700, fontSize: 13 }}>Runtime quality not available</span>
+          <span style={{ fontSize: 12, color: tokens.colorNeutralForeground3, lineHeight: 1.5 }}>
+            {obs.note ?? 'This agent is not instrumented for quality telemetry.'}
+          </span>
+        </div>
+      )}
 
       <LinkOut to={`/assurance?agent=${agent.schemaName}`} label="Open in Assurance" onClose={onClose} />
     </>

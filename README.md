@@ -21,6 +21,7 @@ Built by **Engage Squared**. Brand accent `#165AF1`.
 | **Cost** | Copilot Credits spend explorer (stacked by meter), billed vs zero-rated attribution, side-by-side licensing structures, **per-agent funding model (derived) with a filter**, and budget gauges. The **Ops Copilot** is over budget at ~129%. |
 | **Lifecycle** | Dev→Test→Prod swimlane, Power Platform Pipelines run history, and the **Baggage bot approval gate** with reviewer actions. |
 | **Agent 365** | "Agent 365 governs \| Assurance Hub measures" companion view — registry (registered vs shadow), Entra Agent IDs, Entra ID Protection risk signals, and **third-party / external agents** (Amazon Bedrock, n8n, LangChain, Google Vertex AI, a shadow OpenClaw, an announced ServiceNow) with GA / preview / announced tags. |
+| **Coverage** | The honesty matrix — every signal mapped to its real Microsoft source + GA/preview/beta status + how complete the coverage actually is, plus a per-agent observability table. States every telemetry gap explicitly. |
 | **Ask** | NLP assistant that reasons over the estate (tool-calling simulation) with streamed answers + inline citations, and the **confidence-driven handover** demonstration. |
 
 **Five demo scenarios** (top-bar switcher) jump the whole app to a seeded narrative state and deep-link to the module that tells the story: Healthy estate, Drift detected, Data-leak alert, Cost spike, Approval & handover.
@@ -79,7 +80,9 @@ public/staticwebapp.config.json   (copied to /dist on build — SPA fallback + s
 
 ## Feasibility — every module maps to a real, documented data source
 
-A Microsoft reviewer can verify nothing is fabricated. GA unless marked **(preview)** / **(beta)**.
+A Microsoft reviewer can verify nothing is fabricated. GA unless marked **(preview)** / **(beta)**. See the in-app **Coverage** view for the full matrix.
+
+> **Observability is not uniform — and the demo data reflects this.** Quality signals (groundedness, confidence, drift) only exist for agents that are Copilot Studio / Foundry **and** have Application Insights connected **and** an evaluation suite configured. Generative confidence is **derived from instrumented App Insights events — not a native Copilot Studio API**. SharePoint / declarative agents are a runtime black box (Purview governance metadata only); shadow agents have no telemetry at all. Agents without instrumentation render honest **"not available"** states (e.g. the Lounge Feedback Analyzer and the shadow Invoice agent) rather than fabricated charts. Per-agent telemetry levels: `full` / `runtime` / `classic` / `metadata` / `none`.
 
 - **Agent inventory across environments** → Power Platform **Inventory API** / Azure Resource Graph `PowerPlatformResources` where `type == "microsoft.copilotstudio/agents"`, joined to `microsoft.powerplatform/environments`. Fields: `environmentId`, `ownerId`, `lastPublishedAt`, `schemaName`, `botId`, `entraAgentId`; `orchestration` / `model` / `channels` / `isManaged` / `isQuarantined` **(preview)**. Excludes classic PVA v1 bots; not in sovereign clouds. Custom / **Azure AI Foundry code agents** are *not* in the Copilot Studio inventory — they are tracked via Azure AI Foundry + Application Insights (and appear in the Agent 365 registry), so the single "estate" view is **stitched across both sources**, not one API. The Hub distinguishes the two agent types visually throughout.
 - **Accuracy / groundedness / drift / confidence** → Copilot Studio **Agent Evaluation REST API** (`abstention`, `relevance`, `completeness`, AI-explanation) **(preview)**; runtime quality from **Application Insights** `requests` / `customEvents` via **Log Analytics KQL** (per-agent, opt-in connection).

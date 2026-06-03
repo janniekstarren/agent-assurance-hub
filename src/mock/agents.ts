@@ -14,6 +14,7 @@ import type {
   KnowledgeSource,
   KnowledgeSourceType,
   MeterFeature,
+  Observability,
   Owner,
 } from '../types/domain';
 import { rngFor } from './seed';
@@ -178,6 +179,74 @@ export const STORY: Record<string, StoryProfile> = {
     baselineAlerts: 2,
   },
 };
+
+// ---------------------------------------------------------------------------
+// Observability — what telemetry is ACTUALLY available per agent. Quality
+// signals require App Insights to be connected (opt-in) AND an evaluation suite
+// configured. This is not uniform — and that is the honest point.
+// ---------------------------------------------------------------------------
+
+export const OBSERVABILITY: Record<string, Observability> = {
+  syd_hrPolicyAssistant: { appInsights: true, evaluation: true, confidence: 'derived', level: 'full' },
+  syd_contractChecker: { appInsights: true, evaluation: true, confidence: 'derived', level: 'full' },
+  syd_airportOpsCopilot: {
+    appInsights: true,
+    evaluation: true,
+    confidence: 'derived',
+    level: 'full',
+    note: 'Foundry agent emitting OpenTelemetry to Application Insights.',
+  },
+  syd_snowflakeDataAgent: { appInsights: true, evaluation: true, confidence: 'derived', level: 'full' },
+  syd_baggageEnquiryBot: { appInsights: true, evaluation: true, confidence: 'derived', level: 'full' },
+  syd_groundCrewScheduler: { appInsights: true, evaluation: true, confidence: 'derived', level: 'full' },
+  syd_retailConcierge: {
+    appInsights: false,
+    evaluation: false,
+    confidence: 'classic-nlu',
+    level: 'classic',
+    note: 'Classic NLU — recognition confidence is available; generative groundedness does not apply.',
+  },
+  syd_carparkAvailability: {
+    appInsights: false,
+    evaluation: false,
+    confidence: 'classic-nlu',
+    level: 'classic',
+    note: 'Classic NLU — recognition confidence; generative groundedness not applicable.',
+  },
+  syd_securityIncidentTriage: {
+    appInsights: true,
+    evaluation: false,
+    confidence: 'derived',
+    level: 'runtime',
+    note: 'Instrumented, but the evaluation suite was paused while retiring — no current groundedness.',
+  },
+  syd_loungeFeedback: {
+    appInsights: false,
+    evaluation: false,
+    confidence: 'none',
+    level: 'metadata',
+    note: 'Application Insights not connected — only Purview governance metadata is available.',
+  },
+  syd_invoiceReconciliation: {
+    appInsights: false,
+    evaluation: false,
+    confidence: 'none',
+    level: 'none',
+    note: 'Shadow agent — not instrumented, not registered, no observability.',
+  },
+};
+
+const DEFAULT_OBSERVABILITY: Observability = {
+  appInsights: false,
+  evaluation: false,
+  confidence: 'none',
+  level: 'metadata',
+  note: 'Not instrumented — governance metadata only.',
+};
+
+export function observabilityFor(schemaName: string): Observability {
+  return OBSERVABILITY[schemaName] ?? DEFAULT_OBSERVABILITY;
+}
 
 // ---------------------------------------------------------------------------
 // AGENTS — the estate
