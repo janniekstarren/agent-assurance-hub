@@ -10,6 +10,7 @@ import { CommandBar } from './CommandBar';
 import { ScenarioBanner } from './ScenarioBanner';
 import { AskDrawer } from './AskDrawer';
 import { AgentDrawer } from '../components/AgentDrawer';
+import { IncidentDrawer } from '../components/IncidentDrawer';
 import { LoadingState } from '../components/primitives';
 
 const useStyles = makeStyles({
@@ -49,6 +50,7 @@ export function Layout() {
         </div>
         <AskDrawer />
         <AgentDrawer />
+        <IncidentDrawer />
       </div>
     </MotionConfig>
   );

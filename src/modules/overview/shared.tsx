@@ -1,18 +1,21 @@
 /** Shared building blocks for the persona Overview views. */
 
-import { Badge, makeStyles, tokens } from '@fluentui/react-components';
+import { Badge, Button, makeStyles, tokens } from '@fluentui/react-components';
 import {
   Bot24Regular,
   ChevronRight20Regular,
   ClockArrowDownload24Regular,
   Money24Regular,
+  Search16Regular,
   ShieldCheckmark24Regular,
   ShieldError24Regular,
 } from '@fluentui/react-icons';
 import { motion } from 'framer-motion';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import { useAppState } from '../../app/AppState';
 import { SeverityBadge } from '../../components/badges';
+import { INCIDENT_BY_SCHEMA } from '../../mock/incidents';
 import type { AttentionItem, Environment, GovernanceZone } from '../../types/domain';
 
 export const stagger = {
@@ -93,11 +96,13 @@ const useStyles = makeStyles({
 export function AttentionList({ items }: { items: AttentionItem[] }) {
   const s = useStyles();
   const navigate = useNavigate();
+  const { openIncident } = useAppState();
   if (items.length === 0) return <div className={s.empty}>Nothing needs attention right now.</div>;
   return (
     <motion.div className={s.attnList} variants={stagger} initial="initial" animate="animate">
       {items.map((a) => {
         const tint = REASON_TINT[a.reason] ?? REASON_TINT.stale;
+        const incident = INCIDENT_BY_SCHEMA[a.schemaName];
         return (
           <motion.div key={a.schemaName + a.reason} variants={item} className={s.attnRow} onClick={() => navigate(a.route)}>
             <span className={s.attnIcon} style={{ background: tint.bg, color: tint.fg }}>
@@ -111,7 +116,21 @@ export function AttentionList({ items }: { items: AttentionItem[] }) {
             <Badge appearance="outline" color="informative" size="small">
               {a.environment.toUpperCase()}
             </Badge>
-            <ChevronRight20Regular style={{ color: tokens.colorNeutralForeground4 }} />
+            {incident ? (
+              <Button
+                size="small"
+                appearance="subtle"
+                icon={<Search16Regular />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openIncident(incident.id);
+                }}
+              >
+                Diagnose
+              </Button>
+            ) : (
+              <ChevronRight20Regular style={{ color: tokens.colorNeutralForeground4 }} />
+            )}
           </motion.div>
         );
       })}

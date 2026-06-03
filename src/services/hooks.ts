@@ -17,6 +17,7 @@ import type { CostFilter } from './cost';
 import * as lifecycle from './lifecycle';
 import * as agent365 from './agent365';
 import * as coverage from './coverage';
+import * as incidents from './incidents';
 import { getEstateOverview } from './overview';
 
 const STALE = 5 * 60 * 1000;
@@ -208,6 +209,19 @@ export function useAgentObservability() {
   return useQuery({
     queryKey: ['coverage-agents'],
     queryFn: coverage.getAgentObservability,
+    staleTime: STALE,
+  });
+}
+
+// --- incidents --------------------------------------------------------------
+export function useIncidents() {
+  return useQuery({ queryKey: ['incidents'], queryFn: incidents.getIncidents, staleTime: STALE });
+}
+export function useIncident(key: string | null) {
+  return useQuery({
+    queryKey: ['incident', key],
+    queryFn: () => incidents.getIncident(key as string),
+    enabled: !!key,
     staleTime: STALE,
   });
 }

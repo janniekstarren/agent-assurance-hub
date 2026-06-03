@@ -45,6 +45,10 @@ interface AppState {
   agentDrawerId: string | null;
   openAgent: (id: string) => void;
   closeAgent: () => void;
+  /** The live-incident root-cause slide-over (keyed by incident id or schema). */
+  incidentKey: string | null;
+  openIncident: (key: string) => void;
+  closeIncident: () => void;
 }
 
 const AppStateContext = createContext<AppState | null>(null);
@@ -73,6 +77,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [askOpen, setAskOpen] = useState(false);
   const [askSeed, setAskSeed] = useState<string | null>(null);
   const [agentDrawerId, setAgentDrawerId] = useState<string | null>(null);
+  const [incidentKey, setIncidentKey] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('aah.theme', themeMode);
@@ -104,6 +109,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, []);
   const openAgent = useCallback((id: string) => setAgentDrawerId(id), []);
   const closeAgent = useCallback(() => setAgentDrawerId(null), []);
+  const openIncident = useCallback((key: string) => setIncidentKey(key), []);
+  const closeIncident = useCallback(() => setIncidentKey(null), []);
 
   const value = useMemo<AppState>(
     () => ({
@@ -128,6 +135,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       agentDrawerId,
       openAgent,
       closeAgent,
+      incidentKey,
+      openIncident,
+      closeIncident,
     }),
     [
       themeMode,
@@ -147,6 +157,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       agentDrawerId,
       openAgent,
       closeAgent,
+      incidentKey,
+      openIncident,
+      closeIncident,
     ],
   );
 

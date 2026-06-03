@@ -556,3 +556,49 @@ export interface Citation {
   route: string;
   kind: 'agent' | 'module' | 'tile' | 'alert';
 }
+
+// ---------------------------------------------------------------------------
+// Live incidents — "when an agent breaks, how do we know what broke?"
+// ---------------------------------------------------------------------------
+
+export type IncidentKind = 'runtime-error' | 'quality-degradation' | 'cost-spike' | 'safety';
+
+/** Where a piece of diagnostic evidence comes from — i.e. how it's collected. */
+export type DetectionSource =
+  | 'app-insights'
+  | 'continuous-eval'
+  | 'purview'
+  | 'ppac'
+  | 'inventory'
+  | 'load-test';
+
+export interface EvidenceStep {
+  source: DetectionSource;
+  /** The real collection method, e.g. 'Azure Monitor KQL over App Insights'. */
+  method: string;
+  at: string;
+  finding: string;
+  /** Optional supporting detail — an exception, a failing golden question. */
+  detail?: string;
+  /** Optional KQL / query shown as the actual evidence. */
+  query?: string;
+}
+
+export interface Incident {
+  id: string;
+  schemaName: string;
+  agentName: string;
+  environment: Environment;
+  kind: IncidentKind;
+  status: 'active' | 'mitigated' | 'resolved';
+  detectedAt: string;
+  /** The user-visible symptom. */
+  symptom: string;
+  /** The correlated evidence chain that pinpoints the cause. */
+  evidence: EvidenceStep[];
+  /** The correlated change, if any (e.g. a knowledge-source revision). */
+  change?: string;
+  rootCause: string;
+  recommendedAction: string;
+  runbook: string[];
+}
