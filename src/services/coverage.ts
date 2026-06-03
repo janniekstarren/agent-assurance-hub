@@ -4,13 +4,23 @@
  * exactly where telemetry comes from and where the gaps are.
  */
 
-import type { AgentType, Environment, SignalCoverage, TelemetryLevel } from '../types/domain';
-import { SIGNAL_COVERAGE } from '../mock/coverage';
+import type {
+  AgentType,
+  CollectionMethod,
+  Environment,
+  SignalCoverage,
+  TelemetryLevel,
+} from '../types/domain';
+import { COLLECTION_METHODS, SIGNAL_COVERAGE } from '../mock/coverage';
 import { AGENTS, observabilityFor } from '../mock/agents';
 import { respond } from './mockApi';
 
 export async function getSignalCoverage(): Promise<SignalCoverage[]> {
   return respond(SIGNAL_COVERAGE, { label: 'coverage.signals' });
+}
+
+export async function getCollectionMethods(): Promise<CollectionMethod[]> {
+  return respond(COLLECTION_METHODS, { label: 'coverage.methods' });
 }
 
 export interface AgentObservabilityRow {

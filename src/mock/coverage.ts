@@ -6,7 +6,55 @@
  * and shadow agents are governance-metadata-only or nothing.
  */
 
-import type { SignalCoverage } from '../types/domain';
+import type { CollectionMethod, SignalCoverage } from '../types/domain';
+
+/**
+ * How the signals are actually collected — the real pipeline and its hard
+ * limits. Grounds the demo in the team's actual tooling rather than implying a
+ * magic feed.
+ */
+export const COLLECTION_METHODS: CollectionMethod[] = [
+  {
+    name: 'Functional / regression testing',
+    tool: 'Agent CLI (Python)',
+    purpose: 'Scripted prompts assert expected behaviour and answers.',
+    feeds: 'Golden questions · smoke tests',
+    status: 'in-use',
+  },
+  {
+    name: 'Load / stress testing',
+    tool: 'Apache JMeter (multi-thread)',
+    purpose: 'Drives concurrency + throughput; surfaces failures under load.',
+    feeds: 'Performance · runtime errors (captured in App Insights)',
+    status: 'in-use',
+  },
+  {
+    name: 'Quality scoring',
+    tool: 'LLM-as-a-judge (Azure AI Foundry evaluators)',
+    purpose: 'An LLM grades groundedness / relevance against reference answers.',
+    feeds: 'Groundedness · golden-question pass/fail',
+    status: 'in-use',
+  },
+  {
+    name: 'Continuous evaluation',
+    tool: 'Power Automate recurrence → Copilot Studio agent',
+    purpose: 'Triggers the agent every 8 hours against the golden set; writes results to Dataverse. (Microsoft-recommended pattern.)',
+    feeds: 'Eval-over-time · drift detection',
+    status: 'in-use',
+    constraint:
+      'Hard limits: 1 test running at a time, 20 tests per day. That is precisely why cadence is ~8h, not real-time — it caps how often and how broadly you can re-evaluate.',
+  },
+  {
+    name: 'Runtime observability',
+    tool: 'Azure Application Insights + Azure Monitor Logs (KQL)',
+    purpose:
+      'KQL pulls all OpenTelemetry (requests / dependencies / exceptions / customEvents) into a table surfaced INSIDE the Power Platform solution — one location, no trip to Azure for business users.',
+    feeds: 'Runtime telemetry · exceptions · dependency health · cost events',
+    status: 'in-use',
+    constraint:
+      'Opt-in per agent; only what the runtime emits. Foundry agents via OpenTelemetry; SharePoint / declarative agents emit little to nothing.',
+  },
+];
 
 export const SIGNAL_COVERAGE: SignalCoverage[] = [
   {

@@ -17,9 +17,9 @@ import {
   confidenceSeriesFor,
   confidenceThreshold,
   latestConfidence,
-  pulseSeries,
   volumeSeriesFor,
 } from '../mock/telemetry';
+import { logAnalytics } from './synthetic/client';
 import { respond } from './mockApi';
 
 export interface ConfidenceView {
@@ -45,8 +45,19 @@ export async function getConfidence(
 }
 
 export async function getPulse(): Promise<TimePoint[]> {
-  // Short latency — this tile feels "live".
-  return respond(pulseSeries(), { min: 80, max: 200, label: 'telemetry.pulse' });
+  // Through the synthetic API: an Azure Monitor KQL query → Log Analytics table
+  // → parsed back to a series. This is the App-Insights-KQL path the team uses.
+  const res = await logAnalytics.query(
+    'requests | summarize count() by bin(timestamp, 30m) | order by timestamp asc',
+  );
+  const table = res.tables[0];
+  const ti = table.columns.findIndex((c) => c.name === 'timestamp');
+  const vi = table.columns.findIndex((c) => c.name === 'count_');
+  const points: TimePoint[] = table.rows.map((row) => ({
+    date: String(row[ti]),
+    value: Number(row[vi]),
+  }));
+  return respond(points, { min: 80, max: 200, label: 'telemetry.pulse' });
 }
 
 export async function getVolume(

@@ -3,13 +3,14 @@ import {
   CheckmarkCircle16Filled,
   DismissCircle16Filled,
   Info16Regular,
+  Warning16Filled,
 } from '@fluentui/react-icons';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { AgentTypeBadge } from '../../components/AgentTypeBadge';
 import { EnvBadge } from '../../components/badges';
 import { ErrorState, LoadingState, PageContainer, Panel, SectionTitle } from '../../components/primitives';
-import { useAgentObservability, useSignalCoverage } from '../../services/hooks';
+import { useAgentObservability, useCollectionMethods, useSignalCoverage } from '../../services/hooks';
 import type { CoverageLevel, CoverageStatus, TelemetryLevel } from '../../types/domain';
 
 const COVERAGE_META: Record<CoverageLevel, { label: string; color: string }> = {
@@ -94,6 +95,14 @@ const useStyles = makeStyles({
   },
   obsName: { display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 },
   obsNameText: { fontWeight: 600 },
+  methodGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '12px', marginTop: '10px' },
+  methodCard: { padding: '14px', borderRadius: tokens.borderRadiusLarge, border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: tokens.colorNeutralBackground1, display: 'flex', flexDirection: 'column', gap: '6px' },
+  methodTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
+  methodName: { fontSize: '13.5px', fontWeight: 700 },
+  methodTool: { fontSize: '11.5px', fontFamily: 'ui-monospace, Consolas, monospace', color: tokens.colorBrandForeground1 },
+  methodText: { fontSize: '12px', color: tokens.colorNeutralForeground3, lineHeight: 1.45 },
+  methodFeeds: { fontSize: '11px', color: tokens.colorNeutralForeground4 },
+  constraint: { display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '11.5px', color: tokens.colorStatusWarningForeground2, background: tokens.colorStatusWarningBackground1, padding: '8px 10px', borderRadius: tokens.borderRadiusMedium, lineHeight: 1.4, marginTop: '2px' },
 });
 
 function Pill({ label, color }: { label: string; color: string }) {
@@ -118,6 +127,7 @@ export function CoveragePage() {
   const navigate = useNavigate();
   const signals = useSignalCoverage();
   const agents = useAgentObservability();
+  const methods = useCollectionMethods();
 
   if (signals.isLoading || agents.isLoading)
     return <PageContainer><LoadingState label="Loading coverage…" /></PageContainer>;
@@ -166,6 +176,29 @@ export function CoveragePage() {
                 <Pill label={COVERAGE_META[c.coverage].label} color={COVERAGE_META[c.coverage].color} />
               </span>
               <span className={s.caveat}>{c.caveat}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel>
+        <SectionTitle title="How it's collected" caption="The real pipeline behind the signals — and its hard limits." />
+        <div className={s.methodGrid}>
+          {(methods.data ?? []).map((m) => (
+            <div key={m.name} className={s.methodCard}>
+              <div className={s.methodTop}>
+                <span className={s.methodName}>{m.name}</span>
+                <Pill label={m.status === 'in-use' ? 'In use' : 'Recommended'} color={m.status === 'in-use' ? '#107C10' : '#0F6CBD'} />
+              </div>
+              <span className={s.methodTool}>{m.tool}</span>
+              <span className={s.methodText}>{m.purpose}</span>
+              <span className={s.methodFeeds}>Feeds: {m.feeds}</span>
+              {m.constraint && (
+                <span className={s.constraint}>
+                  <Warning16Filled style={{ flexShrink: 0, marginTop: 1 }} />
+                  {m.constraint}
+                </span>
+              )}
             </div>
           ))}
         </div>

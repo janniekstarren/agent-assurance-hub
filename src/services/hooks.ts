@@ -205,6 +205,9 @@ export function useRegistrySummary() {
 export function useSignalCoverage() {
   return useQuery({ queryKey: ['coverage-signals'], queryFn: coverage.getSignalCoverage, staleTime: STALE });
 }
+export function useCollectionMethods() {
+  return useQuery({ queryKey: ['coverage-methods'], queryFn: coverage.getCollectionMethods, staleTime: STALE });
+}
 export function useAgentObservability() {
   return useQuery({
     queryKey: ['coverage-agents'],

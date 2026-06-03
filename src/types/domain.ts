@@ -249,6 +249,17 @@ export interface SignalCoverage {
   caveat: string;
 }
 
+/** How a signal is actually collected — the real tooling + its hard limits. */
+export interface CollectionMethod {
+  name: string;
+  tool: string;
+  purpose: string;
+  feeds: string;
+  status: 'in-use' | 'recommended';
+  /** Real-world constraint / hard limit. */
+  constraint?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Safety  (Purview audit CopilotInteraction / AIAppInteraction via Mgmt API)
 // ---------------------------------------------------------------------------
