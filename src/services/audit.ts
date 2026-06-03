@@ -7,28 +7,72 @@
  * is a separate eDiscovery path). Triage mutations are in-memory for the demo.
  */
 
-import type { AlertStatus, AlertType, SafetyAlert } from '../types/domain';
-import { ALERTS, ALERT_TYPES_ORDER } from '../mock/alerts';
+import type {
+  AlertSeverity,
+  AlertStatus,
+  AlertType,
+  CallerType,
+  Environment,
+  SafetyAlert,
+} from '../types/domain';
+import { ALERT_TYPES_ORDER } from '../mock/alerts';
+import { managementActivity } from './synthetic/client';
+import type { ManagementActivityRecord } from './synthetic/client';
 import { respond } from './mockApi';
 
-let alerts: SafetyAlert[] = ALERTS.map((a) => ({ ...a }));
+/** Parse one Management Activity audit record into the domain SafetyAlert. */
+function recordToAlert(r: ManagementActivityRecord): SafetyAlert {
+  // schemaName rides in ExtendedProperties; strip it back out of display metadata.
+  const { schemaName: sn, ...metadata } = r.ExtendedProperties;
+  return {
+    id: r.Id,
+    schemaName: sn ?? r.AppId,
+    agentId: r.AppId,
+    agentName: r.AppName,
+    environment: r.EnvironmentName as Environment,
+    type: r.AlertType as AlertType,
+    severity: r.Severity as AlertSeverity,
+    status: r.Status as AlertStatus,
+    timestamp: r.CreationTime,
+    accessedResource: r.AccessedResource,
+    sensitivityLabel: r.SensitivityLabel,
+    jailbreakDetected: r.JailbreakDetected,
+    xpiaDetected: r.XPIADetected,
+    callerType: r.CallerType as CallerType,
+    summary: r.Summary,
+    metadata,
+  };
+}
+
+// Hydrated once from the feed; triage mutations persist on this cache.
+let alerts: SafetyAlert[] | null = null;
+async function ensureLoaded(): Promise<SafetyAlert[]> {
+  if (!alerts) {
+    const feed = await managementActivity.feed();
+    alerts = feed.records.map(recordToAlert);
+  }
+  return alerts;
+}
 
 export async function listAlerts(): Promise<SafetyAlert[]> {
+  const current = await ensureLoaded();
   return respond(
-    alerts.map((a) => ({ ...a })),
+    current.map((a) => ({ ...a })),
     { label: 'audit.alerts' },
   );
 }
 
 export async function getAlert(id: string): Promise<SafetyAlert | undefined> {
+  const current = await ensureLoaded();
   return respond(
-    alerts.find((a) => a.id === id),
+    current.find((a) => a.id === id),
     { label: 'audit.alert' },
   );
 }
 
 export async function setAlertStatus(id: string, status: AlertStatus): Promise<SafetyAlert> {
-  alerts = alerts.map((a) => (a.id === id ? { ...a, status } : a));
+  const current = await ensureLoaded();
+  alerts = current.map((a) => (a.id === id ? { ...a, status } : a));
   const updated = alerts.find((a) => a.id === id);
   if (!updated) throw new Error(`Alert ${id} not found`);
   return respond(updated, { min: 120, max: 300, label: 'audit.triage' });
@@ -41,13 +85,14 @@ export interface AlertHeatmap {
 }
 
 export async function getAlertHeatmap(): Promise<AlertHeatmap> {
-  const agents = Array.from(new Set(alerts.map((a) => a.agentName))).sort();
+  const current = await ensureLoaded();
+  const agents = Array.from(new Set(current.map((a) => a.agentName))).sort();
   const types = [...ALERT_TYPES_ORDER];
   const sevRank: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
   const cells: AlertHeatmap['cells'] = [];
   for (const agentName of agents) {
     for (const type of types) {
-      const matching = alerts.filter((a) => a.agentName === agentName && a.type === type);
+      const matching = current.filter((a) => a.agentName === agentName && a.type === type);
       let maxSeverity = '';
       let rank = 0;
       for (const m of matching) {

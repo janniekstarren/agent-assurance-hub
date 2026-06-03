@@ -25,11 +25,34 @@ import {
   FUNDING_MODELS,
   SEAT_LICENSES,
   agentBilledSplit,
-  costRecords,
   fundingModelFor,
 } from '../mock/costLedger';
 import { AGENTS } from '../mock/agents';
+import { costManagement } from './synthetic/client';
 import { respond } from './mockApi';
+
+/** Parse one Cost Management / PPAC ledger row into the domain CostRecord. */
+function rowToCostRecord(row: (string | number)[], col: Record<string, number>): CostRecord {
+  return {
+    date: String(row[col.UsageDate]),
+    schemaName: String(row[col.AgentSchema]),
+    agentId: String(row[col.AgentId]),
+    environment: String(row[col.Environment]) as Environment,
+    feature: String(row[col.Feature]) as MeterFeature,
+    callerType: String(row[col.CallerType]) as CallerType,
+    units: Number(row[col.Units]),
+    credits: Number(row[col.Credits]),
+    billed: Number(row[col.Billed]) === 1,
+  };
+}
+
+/** Daily credit ledger via Cost Management + PPAC, parsed from the columns+rows table. */
+async function fetchCostRecords(): Promise<CostRecord[]> {
+  const res = await costManagement.queryCreditLedger();
+  const col: Record<string, number> = {};
+  res.properties.columns.forEach((c, i) => (col[c.name] = i));
+  return res.properties.rows.map((row) => rowToCostRecord(row, col));
+}
 
 export { FUNDING_MODELS };
 
@@ -66,7 +89,7 @@ export interface CostSummary {
 }
 
 export async function getCostSummary(filter: CostFilter = {}): Promise<CostSummary> {
-  const records = applyFilter(costRecords(), { window: 'mtd', ...filter });
+  const records = applyFilter(await fetchCostRecords(), { window: 'mtd', ...filter });
   const round = (n: number) => Math.round(n);
 
   const byFeatureMap = new Map<MeterFeature, number>();
@@ -120,7 +143,7 @@ export interface StackedSpend {
 }
 
 export async function getSpendStacked(filter: CostFilter = {}): Promise<StackedSpend> {
-  const records = applyFilter(costRecords(), { window: '90d', ...filter });
+  const records = applyFilter(await fetchCostRecords(), { window: '90d', ...filter });
   const featureSet = new Set<MeterFeature>();
   const byDate = new Map<string, Record<string, number | string>>();
   for (const r of records) {
@@ -153,7 +176,7 @@ export async function getAgentCostBreakdown(
   schemaName: string,
   environment: Environment,
 ): Promise<AgentCostBreakdown> {
-  const records = applyFilter(costRecords(), { window: 'mtd', schemaName, environment });
+  const records = applyFilter(await fetchCostRecords(), { window: 'mtd', schemaName, environment });
   const round = (n: number) => Math.round(n);
   const byFeature = new Map<MeterFeature, number>();
   const byCaller = new Map<CallerType, { credits: number; billed: boolean }>();

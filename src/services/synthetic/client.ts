@@ -20,8 +20,10 @@
  */
 
 import type { Channel, KnowledgeSource } from '../../types/domain';
-import { AGENTS } from '../../mock/agents';
+import { AGENTS, observabilityFor } from '../../mock/agents';
 import { pulseSeries } from '../../mock/telemetry';
+import { latestEvalRun } from '../../mock/evalRuns';
+import { costRecords } from '../../mock/costLedger';
 import { ALERTS } from '../../mock/alerts';
 
 // ---------------------------------------------------------------------------
@@ -183,26 +185,161 @@ export const logAnalytics = {
 };
 
 // ---------------------------------------------------------------------------
-// The rest of the surface — same pattern, wired identically when going live.
+// Office 365 Management Activity API — Purview audit (safety)
 // ---------------------------------------------------------------------------
 
+/** Management Activity audit record (Audit.AI content type). Metadata only —
+ *  never raw prompt text (that is a separate eDiscovery path). */
+export interface ManagementActivityRecord {
+  Id: string;
+  CreationTime: string;
+  Operation: string;
+  Workload: string;
+  RecordType: number;
+  AppId: string;
+  AppName: string;
+  EnvironmentName: string;
+  AlertType: string;
+  Severity: string;
+  Status: string;
+  AccessedResource: string;
+  SensitivityLabel?: string;
+  JailbreakDetected?: boolean;
+  XPIADetected?: boolean;
+  CallerType: string;
+  Summary: string;
+  ExtendedProperties: Record<string, string>;
+}
+
 export const managementActivity = {
-  /** LIVE: GET .../api/v1.0/{tenant}/activity/feed/subscriptions/content?contentType=Audit.AI */
-  async feed(): Promise<{ contentType: string; records: typeof ALERTS }> {
-    return { contentType: 'Audit.AI', records: ALERTS };
+  /**
+   * LIVE: GET .../api/v1.0/{tenant}/activity/feed/subscriptions/content?contentType=Audit.AI
+   * then GET each content blob URI. Surfaces CopilotInteraction / AIAppInteraction
+   * audit records — metadata, sensitivity labels and Jailbreak/XPIA flags only.
+   */
+  async feed(): Promise<{ contentType: string; records: ManagementActivityRecord[] }> {
+    const records = ALERTS.map(
+      (a): ManagementActivityRecord => ({
+        Id: a.id,
+        CreationTime: a.timestamp,
+        Operation: a.callerType === 'Microsoft' ? 'AIAppInteraction' : 'AICopilotInteraction',
+        Workload: 'CopilotStudio',
+        RecordType: 261,
+        AppId: a.agentId,
+        AppName: a.agentName,
+        EnvironmentName: a.environment,
+        AlertType: a.type,
+        Severity: a.severity,
+        Status: a.status,
+        AccessedResource: a.accessedResource,
+        SensitivityLabel: a.sensitivityLabel,
+        JailbreakDetected: a.jailbreakDetected,
+        XPIADetected: a.xpiaDetected,
+        CallerType: a.callerType,
+        Summary: a.summary,
+        // ExtendedProperties is a free-form bag; schemaName lets the reader
+        // resolve the logical agent without a separate inventory join.
+        ExtendedProperties: { ...a.metadata, schemaName: a.schemaName },
+      }),
+    );
+    return { contentType: 'Audit.AI', records };
   },
 };
+
+// ---------------------------------------------------------------------------
+// Dataverse Web API — evaluation runs (written by the continuous-eval flow)
+// ---------------------------------------------------------------------------
+
+/** Dataverse row for the cr_evaluationrun table. The Power Automate
+ *  continuous-eval flow writes one row per run; test-case detail is a JSON
+ *  column (a common flow pattern), deserialised on read. */
+export interface EvaluationRunRow {
+  cr_evaluationrunid: string;
+  cr_schemaname: string;
+  cr_environment: string;
+  cr_ranat: string;
+  cr_baselinerunid: string | null;
+  cr_gatestatus: string;
+  cr_groundedness: number;
+  cr_relevance: number;
+  cr_completeness: number;
+  cr_abstention: number;
+  cr_regression_passed: number | null;
+  cr_regression_failed: number | null;
+  cr_regression_total: number | null;
+  cr_regression_vsbaseline: number | null;
+  cr_testcasesjson: string;
+}
 
 export const dataverse = {
-  /** LIVE: GET https://{org}.crm.dynamics.com/api/data/v9.2/{entitySet}?$filter=... (OData). */
-  async list<T>(entitySet: string, value: T[]): Promise<ODataCollection<T>> {
-    return { '@odata.context': `https://org.crm.dynamics.com/api/data/v9.2/$metadata#${entitySet}`, value };
+  /**
+   * LIVE: GET https://{org}.crm.dynamics.com/api/data/v9.2/cr_evaluationruns
+   *       ?$orderby=cr_ranat desc&$filter=...  (OData; one row per latest run).
+   * Only agents with App Insights + a configured eval suite emit runs.
+   */
+  async listEvaluationRuns(): Promise<ODataCollection<EvaluationRunRow>> {
+    const value: EvaluationRunRow[] = [];
+    for (const a of AGENTS) {
+      if (!observabilityFor(a.schemaName).evaluation) continue;
+      const run = latestEvalRun(a.schemaName, a.environment);
+      value.push({
+        cr_evaluationrunid: run.id,
+        cr_schemaname: run.schemaName,
+        cr_environment: run.environment,
+        cr_ranat: run.ranAt,
+        cr_baselinerunid: run.baselineRunId ?? null,
+        cr_gatestatus: run.gateStatus,
+        cr_groundedness: run.metrics.groundedness,
+        cr_relevance: run.metrics.relevance,
+        cr_completeness: run.metrics.completeness,
+        cr_abstention: run.metrics.abstention,
+        cr_regression_passed: run.regression?.passed ?? null,
+        cr_regression_failed: run.regression?.failed ?? null,
+        cr_regression_total: run.regression?.total ?? null,
+        cr_regression_vsbaseline: run.regression?.vsBaseline ?? null,
+        cr_testcasesjson: JSON.stringify(run.testCases),
+      });
+    }
+    return {
+      '@odata.context': 'https://org.crm.dynamics.com/api/data/v9.2/$metadata#cr_evaluationruns',
+      value,
+    };
   },
 };
 
+// ---------------------------------------------------------------------------
+// Azure Cost Management + PPAC — credit ledger
+// ---------------------------------------------------------------------------
+
 export const costManagement = {
-  /** LIVE: POST https://management.azure.com/.../providers/Microsoft.CostManagement/query?api-version=2023-11-01 */
-  async query(columns: { name: string; type: string }[], rows: (string | number)[][]): Promise<CostManagementResponse> {
+  /**
+   * LIVE: POST https://management.azure.com/.../providers/Microsoft.CostManagement/query?api-version=2023-11-01
+   * for billed $, plus the Power Platform admin center Copilot credit report
+   * (per environment / agent / caller type, daily). Returned as a columns+rows table.
+   */
+  async queryCreditLedger(): Promise<CostManagementResponse> {
+    const columns = [
+      { name: 'UsageDate', type: 'String' },
+      { name: 'AgentSchema', type: 'String' },
+      { name: 'AgentId', type: 'String' },
+      { name: 'Environment', type: 'String' },
+      { name: 'Feature', type: 'String' },
+      { name: 'CallerType', type: 'String' },
+      { name: 'Units', type: 'Number' },
+      { name: 'Credits', type: 'Number' },
+      { name: 'Billed', type: 'Number' },
+    ];
+    const rows: (string | number)[][] = costRecords().map((r) => [
+      r.date,
+      r.schemaName,
+      r.agentId,
+      r.environment,
+      r.feature,
+      r.callerType,
+      r.units,
+      r.credits,
+      r.billed ? 1 : 0,
+    ]);
     return { properties: { columns, rows } };
   },
 };
