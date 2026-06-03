@@ -20,17 +20,20 @@ const useStyles = makeStyles({
     overflow: 'hidden',
   },
   brand: {
-    padding: '18px 16px 14px',
+    // Height matches the command bar (60px) so the rule under the logo lines up
+    // with the header's bottom border into one continuous horizontal line.
+    padding: '0 20px',
     borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
-    minHeight: '66px',
+    height: '60px',
+    minHeight: '60px',
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
   },
-  brandCollapsed: { padding: '18px 0', justifyContent: 'center' },
+  brandCollapsed: { padding: 0, justifyContent: 'center' },
   nav: {
     flex: 1,
-    padding: '10px 10px',
+    padding: '10px 12px',
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
@@ -41,7 +44,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '9px 12px',
+    padding: '9px 8px',
     borderRadius: tokens.borderRadiusLarge,
     textDecoration: 'none',
     color: tokens.colorNeutralForeground2,
@@ -100,7 +103,7 @@ export function NavRail() {
       aria-label="Primary"
     >
       <div className={mergeClasses(s.brand, navCollapsed && s.brandCollapsed)}>
-        {navCollapsed ? <BrandGlyph size={30} /> : <BrandMark />}
+        {navCollapsed ? <BrandGlyph size={32} /> : <BrandMark />}
       </div>
       <div className={s.nav}>
         {NAV_ITEMS.map((item) => (

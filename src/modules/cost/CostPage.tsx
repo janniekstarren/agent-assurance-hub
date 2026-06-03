@@ -1,5 +1,12 @@
 import { Dropdown, Option, Tab, TabList, makeStyles, tokens } from '@fluentui/react-components';
-import { Info16Regular } from '@fluentui/react-icons';
+import {
+  CalendarLtr24Regular,
+  Gift24Regular,
+  Info16Regular,
+  Money24Regular,
+  People24Regular,
+  Wallet24Regular,
+} from '@fluentui/react-icons';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -160,11 +167,11 @@ export function CostPage() {
       </div>
 
       <div className={s.kpiGrid}>
-        <KpiTile label="MTD credits" value={sum.totalCredits} format={(n) => nf(n)} suffix="cr" caption="month to date" />
-        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="#C50F1F" caption="consumes credits" />
-        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="#107C10" caption="M365 Copilot covered" />
-        <KpiTile label="Est. consumption" value={sum.estMonthlyConsumptionUsd} format={(n) => usd(n)} caption="projected $/month (PAYG)" />
-        <KpiTile label="Seat licences" value={seatMonthly} format={(n) => usd(n)} caption="M365 Copilot + Agent 365 /mo" />
+        <KpiTile label="MTD credits" value={sum.totalCredits} format={(n) => nf(n)} suffix="cr" accent="#165AF1" icon={<Money24Regular />} caption="month to date" />
+        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="#C50F1F" icon={<Wallet24Regular />} caption="consumes credits" />
+        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="#107C10" icon={<Gift24Regular />} caption="M365 Copilot covered" />
+        <KpiTile label="Est. consumption" value={sum.estMonthlyConsumptionUsd} format={(n) => usd(n)} icon={<CalendarLtr24Regular />} caption="projected $/month (PAYG)" />
+        <KpiTile label="Seat licences" value={seatMonthly} format={(n) => usd(n)} icon={<People24Regular />} caption="M365 Copilot + Agent 365 /mo" />
       </div>
 
       <Panel>

@@ -1,5 +1,13 @@
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
-import { ArrowExportRegular, CheckmarkCircle24Filled, Warning24Filled } from '@fluentui/react-icons';
+import {
+  ArrowExportRegular,
+  CheckmarkCircle24Filled,
+  CheckmarkCircle24Regular,
+  ErrorCircle24Regular,
+  PlugDisconnected24Regular,
+  Warning24Filled,
+  Warning24Regular,
+} from '@fluentui/react-icons';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { KpiTile } from '../../components/KpiTile';
@@ -22,7 +30,7 @@ const useStyles = makeStyles({
   },
   statusIcon: { width: '44px', height: '44px', borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   statusText: { fontSize: '16px', fontWeight: 600, lineHeight: 1.45 },
-  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gridAutoRows: '150px', gap: '14px' },
+  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(212px, 1fr))', gridAutoRows: '132px', gap: '14px' },
   cell: { height: '100%' },
   split: { display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(0, 1fr)', gap: '14px', '@media (max-width: 1080px)': { gridTemplateColumns: '1fr' } },
   gRow: {
@@ -84,16 +92,16 @@ export function MvpView() {
 
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" caption="passing golden questions" onClick={() => navigate('/assurance')} />
+          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" icon={<CheckmarkCircle24Regular />} caption="passing golden questions" onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : undefined} caption="below baseline accuracy" onClick={() => navigate('/assurance')} />
+          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : '#6E6E6E'} icon={<Warning24Regular />} caption="below baseline accuracy" onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : undefined} caption="not instrumented / evaluated" onClick={() => navigate('/coverage')} />
+          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : '#6E6E6E'} icon={<PlugDisconnected24Regular />} caption="not instrumented / evaluated" onClick={() => navigate('/coverage')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : undefined} caption="need attention" onClick={() => navigate('/safety')} />
+          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : '#6E6E6E'} icon={<ErrorCircle24Regular />} caption="need attention" onClick={() => navigate('/safety')} />
         </motion.div>
       </motion.div>
 

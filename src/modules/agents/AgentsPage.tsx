@@ -31,10 +31,13 @@ import { nf } from '../../utils/format';
 const useStyles = makeStyles({
   toolbar: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' },
   spacer: { flex: 1 },
-  grid: { },
+  grid: {
+    '& .fui-DataGridCell': { alignItems: 'center', minHeight: '56px', paddingTop: '6px', paddingBottom: '6px' },
+    '& .fui-DataGridHeaderCell': { minHeight: '40px' },
+  },
   row: { cursor: 'pointer' },
-  agentName: { display: 'flex', flexDirection: 'column', lineHeight: 1.2 },
-  agentSub: { fontSize: '11px', color: tokens.colorNeutralForeground3 },
+  agentName: { display: 'flex', flexDirection: 'column', lineHeight: 1.25, minWidth: 0 },
+  agentNameText: { fontWeight: 600 },
   assur: { fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
   count: { fontSize: '12px', color: tokens.colorNeutralForeground3 },
   // lineage
@@ -113,10 +116,9 @@ export function AgentsPage() {
         renderCell: (a) => (
           <TableCellLayout>
             <span className={s.agentName}>
-              <span>{a.displayName}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <span className={s.agentNameText}>{a.displayName}</span>
+              <span style={{ marginTop: 4 }}>
                 <AgentTypeBadge type={a.type} short />
-                <span className={s.agentSub}>{a.orchestration}</span>
               </span>
             </span>
           </TableCellLayout>
@@ -126,13 +128,21 @@ export function AgentsPage() {
         columnId: 'env',
         compare: (a, b) => a.environment.localeCompare(b.environment),
         renderHeaderCell: () => 'Env',
-        renderCell: (a) => <EnvBadge env={a.environment} />,
+        renderCell: (a) => (
+          <TableCellLayout>
+            <EnvBadge env={a.environment} />
+          </TableCellLayout>
+        ),
       }),
       createTableColumn<Agent>({
         columnId: 'zone',
         compare: (a, b) => a.zone.localeCompare(b.zone),
         renderHeaderCell: () => 'Zone',
-        renderCell: (a) => <ZoneBadge zone={a.zone} />,
+        renderCell: (a) => (
+          <TableCellLayout>
+            <ZoneBadge zone={a.zone} />
+          </TableCellLayout>
+        ),
       }),
       createTableColumn<Agent>({
         columnId: 'owner',
@@ -144,22 +154,32 @@ export function AgentsPage() {
         columnId: 'lifecycle',
         compare: (a, b) => a.lifecycleState.localeCompare(b.lifecycleState),
         renderHeaderCell: () => 'Lifecycle',
-        renderCell: (a) => <LifecycleBadge state={a.lifecycleState} />,
+        renderCell: (a) => (
+          <TableCellLayout>
+            <LifecycleBadge state={a.lifecycleState} />
+          </TableCellLayout>
+        ),
       }),
       createTableColumn<Agent>({
         columnId: 'registry',
         compare: (a, b) => a.registryStatus.localeCompare(b.registryStatus),
         renderHeaderCell: () => 'Agent 365',
-        renderCell: (a) => <RegistryBadge status={a.registryStatus} />,
+        renderCell: (a) => (
+          <TableCellLayout>
+            <RegistryBadge status={a.registryStatus} />
+          </TableCellLayout>
+        ),
       }),
       createTableColumn<Agent>({
         columnId: 'assurance',
         compare: (a, b) => a.assuranceScore - b.assuranceScore,
         renderHeaderCell: () => 'Assurance',
         renderCell: (a) => (
-          <span className={s.assur} style={{ color: assuranceColor(a.assuranceScore) }}>
-            {a.assuranceScore}
-          </span>
+          <TableCellLayout>
+            <span className={s.assur} style={{ color: assuranceColor(a.assuranceScore) }}>
+              {a.assuranceScore}
+            </span>
+          </TableCellLayout>
         ),
       }),
       createTableColumn<Agent>({
@@ -167,7 +187,9 @@ export function AgentsPage() {
         compare: (a, b) => a.mtdCredits - b.mtdCredits,
         renderHeaderCell: () => 'MTD credits',
         renderCell: (a) => (
-          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{nf(a.mtdCredits)}</span>
+          <TableCellLayout>
+            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{nf(a.mtdCredits)}</span>
+          </TableCellLayout>
         ),
       }),
     ],
@@ -229,6 +251,7 @@ export function AgentsPage() {
       ) : (
         <Panel style={{ padding: 0, overflow: 'hidden' }}>
           <DataGrid
+            className={s.grid}
             items={filtered}
             columns={columns}
             sortable

@@ -12,7 +12,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { Beaker24Regular, ChevronDown16Regular } from '@fluentui/react-icons';
+import { Beaker20Regular, ChevronDown16Regular } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from './AppState';
 import { SCENARIOS, SCENARIO_BY_ID } from '../mock/scenarios';
@@ -20,8 +20,18 @@ import type { ScenarioId } from '../types/domain';
 
 const useStyles = makeStyles({
   trigger: {
-    minWidth: '160px',
+    minWidth: '152px',
+    maxWidth: '220px',
     justifyContent: 'space-between',
+  },
+  triggerLabel: {
+    flex: 1,
+    textAlign: 'left',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    fontWeight: 600,
+    fontSize: '13px',
   },
   item: {
     display: 'flex',
@@ -58,12 +68,10 @@ export function ScenarioSwitcher() {
         <Button
           className={s.trigger}
           appearance="subtle"
-          icon={<Beaker24Regular />}
+          icon={<Beaker20Regular />}
           iconPosition="before"
         >
-          <Badge appearance="tint" color="brand" shape="rounded">
-            {current?.label ?? 'Healthy estate'}
-          </Badge>
+          <span className={s.triggerLabel}>{current?.label ?? 'Healthy estate'}</span>
           <ChevronDown16Regular />
         </Button>
       </MenuTrigger>
