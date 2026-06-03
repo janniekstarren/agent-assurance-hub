@@ -1,6 +1,6 @@
 /** Shared building blocks for the persona Overview views. */
 
-import { Badge, Button, makeStyles, tokens } from '@fluentui/react-components';
+import { Button, makeStyles, tokens } from '@fluentui/react-components';
 import {
   Bot24Regular,
   ChevronRight20Regular,
@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../../app/AppState';
-import { SeverityBadge } from '../../components/badges';
+import { EnvBadge, SeverityBadge } from '../../components/badges';
 import { INCIDENT_BY_SCHEMA } from '../../mock/incidents';
 import type { AttentionItem, Environment, GovernanceZone } from '../../types/domain';
 
@@ -78,6 +78,18 @@ const useStyles = makeStyles({
   attnMain: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' },
   attnName: { fontSize: '13.5px', fontWeight: 600 },
   attnDetail: { fontSize: '12px', color: tokens.colorNeutralForeground3 },
+  // Fixed columns so severity / env / action line up across every row,
+  // regardless of badge text width or whether the row ends in a button or chevron.
+  attnMeta: {
+    display: 'grid',
+    gridTemplateColumns: '70px 48px 104px',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  metaSev: { display: 'flex', justifyContent: 'flex-start', minWidth: 0 },
+  metaEnv: { display: 'flex', justifyContent: 'flex-start' },
+  metaAction: { display: 'flex', justifyContent: 'flex-end' },
   donutWrap: { position: 'relative', height: '190px' },
   donutCenter: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' },
   donutNum: { fontSize: '28px', fontWeight: 700, lineHeight: 1 },
@@ -112,25 +124,31 @@ export function AttentionList({ items }: { items: AttentionItem[] }) {
               <span className={s.attnName}>{a.agentName}</span>
               <span className={s.attnDetail}>{a.detail}</span>
             </span>
-            <SeverityBadge severity={a.severity} />
-            <Badge appearance="outline" color="informative" size="small">
-              {a.environment.toUpperCase()}
-            </Badge>
-            {incident ? (
-              <Button
-                size="small"
-                appearance="subtle"
-                icon={<Search16Regular />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openIncident(incident.id);
-                }}
-              >
-                Diagnose
-              </Button>
-            ) : (
-              <ChevronRight20Regular style={{ color: tokens.colorNeutralForeground4 }} />
-            )}
+            <span className={s.attnMeta}>
+              <span className={s.metaSev}>
+                <SeverityBadge severity={a.severity} />
+              </span>
+              <span className={s.metaEnv}>
+                <EnvBadge env={a.environment} />
+              </span>
+              <span className={s.metaAction}>
+                {incident ? (
+                  <Button
+                    size="small"
+                    appearance="subtle"
+                    icon={<Search16Regular />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openIncident(incident.id);
+                    }}
+                  >
+                    Diagnose
+                  </Button>
+                ) : (
+                  <ChevronRight20Regular style={{ color: tokens.colorNeutralForeground4 }} />
+                )}
+              </span>
+            </span>
           </motion.div>
         );
       })}
