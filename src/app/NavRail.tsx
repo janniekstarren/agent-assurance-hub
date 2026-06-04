@@ -85,16 +85,13 @@ const useStyles = makeStyles({
   label: { fontSize: '13.5px', fontWeight: 600 },
   desc: { fontSize: '11px', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis' },
   footer: {
-    padding: '12px 16px 16px',
+    padding: '12px 20px 16px',
     borderTop: `1px solid ${tokens.colorNeutralStroke3}`,
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
   },
-  footerCollapsed: { alignItems: 'center', padding: '12px 0 16px' },
   footNote: { fontSize: '11px', color: tokens.colorNeutralForeground3, lineHeight: 1.4 },
-  pillRow: { display: 'flex', alignItems: 'center', gap: '6px' },
-  greenDot: { width: '8px', height: '8px', backgroundColor: tokens.colorPaletteGreenBackground3 },
 });
 
 export function NavRail() {
@@ -134,13 +131,12 @@ export function NavRail() {
           </Tooltip>
         ))}
       </div>
-      <div className={mergeClasses(s.footer, navCollapsed && s.footerCollapsed)}>
-        <div className={s.pillRow}>
-          <span className={mergeClasses('pulse-dot', s.greenDot)} />
-          {!navCollapsed && <span className={s.footNote}>Companion to Microsoft Agent 365</span>}
+      {!navCollapsed && (
+        <div className={s.footer}>
+          <span className={s.footNote}>Companion to Microsoft Agent 365</span>
+          <span className={s.footNote}>Pre-seeded synthetic API data · 24 May 2026</span>
         </div>
-        {!navCollapsed && <span className={s.footNote}>Mock data · estate as of 24 May 2026</span>}
-      </div>
+      )}
     </nav>
   );
 }
