@@ -166,15 +166,15 @@ export function Agent365Page() {
           </div>
           <div className={s.stat}>
             <div className={s.statTop}><span className={s.statLabel}>Shadow</span><PreviewTag note="Defender / Intune shadow-agent discovery (preview)" /></div>
-            <div className={s.statNum} style={{ color: '#C50F1F' }}>{summary.shadow}</div>
+            <div className={s.statNum} style={{ color: 'var(--aah-bad)' }}>{summary.shadow}</div>
           </div>
           <div className={s.stat}>
             <div className={s.statTop}><span className={s.statLabel}>Pending approval</span></div>
-            <div className={s.statNum} style={{ color: '#B88217' }}>{summary.pendingApproval}</div>
+            <div className={s.statNum} style={{ color: 'var(--aah-warn)' }}>{summary.pendingApproval}</div>
           </div>
           <div className={s.stat}>
             <div className={s.statTop}><span className={s.statLabel}>Risky agents</span><PreviewTag note="Entra ID Protection riskyAgents / agentRiskDetections (beta)" /></div>
-            <div className={s.statNum} style={{ color: '#D83B01' }}>{summary.riskyAgents}</div>
+            <div className={s.statNum} style={{ color: 'var(--aah-danger)' }}>{summary.riskyAgents}</div>
           </div>
           <div className={s.stat}>
             <div className={s.statTop}><span className={s.statLabel}>External / 3rd-party</span></div>

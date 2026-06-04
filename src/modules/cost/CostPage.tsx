@@ -41,7 +41,7 @@ import type { CallerType, MeterFeature } from '../../types/domain';
 import { compact, dateShort, nf, usd } from '../../utils/format';
 
 const FEATURE_COLOR: Record<MeterFeature, string> = {
-  'reasoning-surcharge': '#C50F1F',
+  'reasoning-surcharge': 'var(--aah-bad)',
   'graph-grounding': '#8764B8',
   'agent-action': '#165AF1',
   'ai-tools-premium': '#E3008C',
@@ -57,9 +57,9 @@ const FEATURE_COLOR: Record<MeterFeature, string> = {
 };
 
 const FUNDING_COLOR: Record<string, string> = {
-  'm365-seat': '#107C10',
+  'm365-seat': 'var(--aah-good)',
   prepaid: '#165AF1',
-  'shared-pool': '#B88217',
+  'shared-pool': 'var(--aah-warn)',
   payg: '#8332B0',
 };
 
@@ -168,8 +168,8 @@ export function CostPage() {
 
       <div className={s.kpiGrid}>
         <KpiTile label="MTD credits" value={sum.totalCredits} format={(n) => nf(n)} suffix="cr" accent="#165AF1" icon={<Money24Regular />} caption="month to date" />
-        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="#C50F1F" icon={<Wallet24Regular />} caption="consumes credits" />
-        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="#107C10" icon={<Gift24Regular />} caption="M365 Copilot covered" />
+        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-bad)" icon={<Wallet24Regular />} caption="consumes credits" />
+        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-good)" icon={<Gift24Regular />} caption="M365 Copilot covered" />
         <KpiTile label="Est. consumption" value={sum.estMonthlyConsumptionUsd} format={(n) => usd(n)} icon={<CalendarLtr24Regular />} caption="projected $/month (PAYG)" />
         <KpiTile label="Seat licences" value={seatMonthly} format={(n) => usd(n)} icon={<People24Regular />} caption="M365 Copilot + Agent 365 /mo" />
       </div>
@@ -276,21 +276,21 @@ export function CostPage() {
                   <div className={s.callerTop}>
                     <CallerBadge caller={c.callerType} />
                     <span className={s.spacer} />
-                    <span style={{ color: '#C50F1F' }}>{nf(c.billed)} billed</span>
-                    <span style={{ color: '#107C10' }}>{nf(c.zeroRated)} free</span>
+                    <span style={{ color: 'var(--aah-bad)' }}>{nf(c.billed)} billed</span>
+                    <span style={{ color: 'var(--aah-good)' }}>{nf(c.zeroRated)} free</span>
                   </div>
                   <div className={s.bar}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(c.billed / maxCaller) * 100}%` }}
                       transition={{ duration: 0.7, ease: [0.1, 0.9, 0.2, 1] }}
-                      style={{ background: '#C50F1F' }}
+                      style={{ background: 'var(--aah-bad)' }}
                     />
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(c.zeroRated / maxCaller) * 100}%` }}
                       transition={{ duration: 0.7, ease: [0.1, 0.9, 0.2, 1] }}
-                      style={{ background: '#107C10' }}
+                      style={{ background: 'var(--aah-good)' }}
                     />
                   </div>
                 </div>
@@ -304,10 +304,10 @@ export function CostPage() {
             <li>
               A <strong>Microsoft 365 Copilot–licensed User</strong> using an agent in Copilot
               Chat / Teams / SharePoint under their own identity → core conversational features are{' '}
-              <strong style={{ color: '#107C10' }}>zero-rated</strong>.
+              <strong style={{ color: 'var(--aah-good)' }}>zero-rated</strong>.
             </li>
             <li>
-              Credits are <strong style={{ color: '#C50F1F' }}>billed</strong> when the caller is{' '}
+              Credits are <strong style={{ color: 'var(--aah-bad)' }}>billed</strong> when the caller is{' '}
               <strong>non-licensed</strong>, the agent is <strong>external / B2C</strong> or{' '}
               <strong>autonomous</strong> (runs on its own identity), or it is published to{' '}
               <strong>non-Microsoft channels</strong>.
@@ -410,8 +410,8 @@ export function CostPage() {
                 </span>
                 <span className={s.covWrap}>
                   <span className={s.covBar}>
-                    <span style={{ width: `${r.zeroRatedPct}%`, background: '#107C10' }} />
-                    <span style={{ width: `${100 - r.zeroRatedPct}%`, background: '#C50F1F' }} />
+                    <span style={{ width: `${r.zeroRatedPct}%`, background: 'var(--aah-good)' }} />
+                    <span style={{ width: `${100 - r.zeroRatedPct}%`, background: 'var(--aah-bad)' }} />
                   </span>
                   <span className={s.covLabel}>
                     {r.zeroRatedPct}% seat-covered · {100 - r.zeroRatedPct}% billed
@@ -419,7 +419,7 @@ export function CostPage() {
                 </span>
                 <span>
                   {r.capPct != null ? (
-                    <span style={{ color: r.capPct > 100 ? '#C50F1F' : r.capPct >= 75 ? '#B88217' : '#107C10', fontWeight: 600 }}>
+                    <span style={{ color: r.capPct > 100 ? 'var(--aah-bad)' : r.capPct >= 75 ? 'var(--aah-warn)' : 'var(--aah-good)', fontWeight: 600 }}>
                       {r.capPct}%{r.hardStop ? ' · stop' : ''}
                     </span>
                   ) : (

@@ -32,8 +32,8 @@ export function ExecutiveView() {
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
 
   const spendPct = Math.round((data.mtdCredits / data.budgetCredits) * 100);
-  const spendColor = spendPct > 90 ? '#C50F1F' : spendPct > 75 ? '#F7A700' : '#13A10E';
-  const assuranceColor = data.assuranceScore >= 85 ? '#13A10E' : data.assuranceScore >= 70 ? '#F7A700' : '#C50F1F';
+  const spendColor = spendPct > 90 ? 'var(--aah-bad)' : spendPct > 75 ? '#F7A700' : 'var(--aah-good)';
+  const assuranceColor = data.assuranceScore >= 85 ? 'var(--aah-good)' : data.assuranceScore >= 70 ? '#F7A700' : 'var(--aah-bad)';
   const pulseNow = pulse && pulse.length ? pulse[pulse.length - 1].value : 0;
   const criticalRisks = data.attention.filter((a) => a.severity === 'critical' || a.severity === 'high');
 
@@ -47,7 +47,7 @@ export function ExecutiveView() {
           <KpiTile label="MTD credit spend" value={data.mtdCredits} format={(n) => nf(n)} suffix="cr" progress={spendPct} progressColor={spendColor} caption={`${spendPct}% of ${nf(data.budgetCredits)} cap`} onClick={() => navigate('/cost')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open safety alerts" value={data.openAlerts} accent={data.openAlerts > 0 ? '#C50F1F' : undefined} icon={<ShieldError24Regular />} caption="awaiting triage" onClick={() => navigate('/safety')} />
+          <KpiTile label="Open safety alerts" value={data.openAlerts} accent={data.openAlerts > 0 ? 'var(--aah-bad)' : undefined} icon={<ShieldError24Regular />} caption="awaiting triage" onClick={() => navigate('/safety')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
           <KpiTile label="Total agents" value={data.totalAgents} icon={<Bot24Regular />} caption="across Dev / Test / Prod" onClick={() => navigate('/agents')} />

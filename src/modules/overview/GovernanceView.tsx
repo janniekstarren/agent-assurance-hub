@@ -23,7 +23,7 @@ const TYPE_LABEL: Record<AlertType, string> = {
   oversharing: 'Oversharing',
   'sensitivity-label-exposed': 'Label exposed',
 };
-const SEV_COLOR: Record<string, string> = { critical: '#C50F1F', high: '#D83B01', medium: '#B88217', low: '#5C9BD5' };
+const SEV_COLOR: Record<string, string> = { critical: 'var(--aah-bad)', high: 'var(--aah-danger)', medium: 'var(--aah-warn)', low: '#5C9BD5' };
 const RISK_RANK: Record<string, number> = { high: 3, medium: 2, low: 1, none: 0 };
 
 const useStyles = makeStyles({
@@ -83,22 +83,22 @@ export function GovernanceView() {
     <>
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open safety alerts" value={open.length} accent={open.length ? '#C50F1F' : undefined} icon={<ShieldError24Regular />} caption={`${critical} critical`} onClick={() => navigate('/safety')} />
+          <KpiTile label="Open safety alerts" value={open.length} accent={open.length ? 'var(--aah-bad)' : undefined} icon={<ShieldError24Regular />} caption={`${critical} critical`} onClick={() => navigate('/safety')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Shadow agents" value={summary.data.shadow} accent={summary.data.shadow ? '#C50F1F' : undefined} icon={<PersonProhibited24Regular />} caption="unregistered / unmanaged" onClick={() => navigate('/agent365')} />
+          <KpiTile label="Shadow agents" value={summary.data.shadow} accent={summary.data.shadow ? 'var(--aah-bad)' : undefined} icon={<PersonProhibited24Regular />} caption="unregistered / unmanaged" onClick={() => navigate('/agent365')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Risky agents" value={summary.data.riskyAgents} accent="#D83B01" icon={<ShieldKeyhole24Regular />} caption="Entra ID Protection" onClick={() => navigate('/agent365')} />
+          <KpiTile label="Risky agents" value={summary.data.riskyAgents} accent="var(--aah-danger)" icon={<ShieldKeyhole24Regular />} caption="Entra ID Protection" onClick={() => navigate('/agent365')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
           <KpiTile label="Pending approvals" value={summary.data.pendingApproval} icon={<ClockArrowDownload24Regular />} caption="in the publish gate" onClick={() => navigate('/lifecycle')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Conditional Access" value={caPct} suffix="%" progress={caPct} progressColor={caPct >= 80 ? '#13A10E' : '#F7A700'} caption="of agents covered" />
+          <KpiTile label="Conditional Access" value={caPct} suffix="%" progress={caPct} progressColor={caPct >= 80 ? 'var(--aah-good)' : '#F7A700'} caption="of agents covered" />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Registry coverage" value={regPct} suffix="%" progress={regPct} progressColor={regPct >= 80 ? '#13A10E' : '#F7A700'} caption="registered in Agent 365" />
+          <KpiTile label="Registry coverage" value={regPct} suffix="%" progress={regPct} progressColor={regPct >= 80 ? 'var(--aah-good)' : '#F7A700'} caption="registered in Agent 365" />
         </motion.div>
       </motion.div>
 
@@ -178,7 +178,7 @@ export function GovernanceView() {
 
 function Posture({ label, pct, tone }: { label: string; pct: number; tone?: 'info' }) {
   const s = useStyles();
-  const color = tone === 'info' ? '#8332B0' : pct >= 80 ? '#13A10E' : pct >= 50 ? '#F7A700' : '#C50F1F';
+  const color = tone === 'info' ? '#8332B0' : pct >= 80 ? 'var(--aah-good)' : pct >= 50 ? '#F7A700' : 'var(--aah-bad)';
   return (
     <div className={s.postureRow}>
       <span className={s.postureLabel}>{label}</span>

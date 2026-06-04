@@ -74,7 +74,7 @@ export function MvpView() {
   const issues = overview.data.attention;
   const allClear = degrading.length === 0 && issues.length === 0;
 
-  const statusColor = allClear ? '#107C10' : degrading.length ? '#C50F1F' : '#B88217';
+  const statusColor = allClear ? 'var(--aah-good)' : degrading.length ? 'var(--aah-bad)' : 'var(--aah-warn)';
   const statusText =
     `${onTrack} of ${evaluated} evaluated agents are answering correctly against their golden questions.` +
     `${degrading.length ? ` ${degrading.length} ${degrading.length === 1 ? 'is' : 'are'} degrading.` : ''}` +
@@ -92,16 +92,16 @@ export function MvpView() {
 
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" icon={<CheckmarkCircle24Regular />} caption="passing golden questions" hint="Agents whose latest evaluation run passes their golden-question set. Source: Copilot Studio Agent Evaluation API, read from the continuous-eval Dataverse table." onClick={() => navigate('/assurance')} />
+          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="var(--aah-good)" icon={<CheckmarkCircle24Regular />} caption="passing golden questions" hint="Agents whose latest evaluation run passes their golden-question set. Source: Copilot Studio Agent Evaluation API, read from the continuous-eval Dataverse table." onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : '#6E6E6E'} icon={<Warning24Regular />} caption="below baseline accuracy" hint="Evaluated agents whose groundedness has fallen below their published baseline, or with failing golden questions — compared run-over-run." onClick={() => navigate('/assurance')} />
+          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? 'var(--aah-bad)' : '#6E6E6E'} icon={<Warning24Regular />} caption="below baseline accuracy" hint="Evaluated agents whose groundedness has fallen below their published baseline, or with failing golden questions — compared run-over-run." onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : '#6E6E6E'} icon={<PlugDisconnected24Regular />} caption="not instrumented / evaluated" hint="Non-draft agents with no evaluation suite or Application Insights connection — their quality can't be measured. Source: per-agent observability." onClick={() => navigate('/coverage')} />
+          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? 'var(--aah-danger)' : '#6E6E6E'} icon={<PlugDisconnected24Regular />} caption="not instrumented / evaluated" hint="Non-draft agents with no evaluation suite or Application Insights connection — their quality can't be measured. Source: per-agent observability." onClick={() => navigate('/coverage')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : '#6E6E6E'} icon={<ErrorCircle24Regular />} caption="need attention" hint="Items needing attention across safety, cost, drift and approvals — the list shown on the right." onClick={() => navigate('/safety')} />
+          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? 'var(--aah-danger)' : '#6E6E6E'} icon={<ErrorCircle24Regular />} caption="need attention" hint="Items needing attention across safety, cost, drift and approvals — the list shown on the right." onClick={() => navigate('/safety')} />
         </motion.div>
       </motion.div>
 
@@ -133,17 +133,17 @@ export function MvpView() {
               </span>
               <span className={s.passWrap}>
                 <span className={s.passBar}>
-                  <span style={{ width: `${(g.passed / g.total) * 100}%`, background: '#107C10' }} />
-                  <span style={{ width: `${(g.failed / g.total) * 100}%`, background: '#C50F1F' }} />
+                  <span style={{ width: `${(g.passed / g.total) * 100}%`, background: 'var(--aah-good)' }} />
+                  <span style={{ width: `${(g.failed / g.total) * 100}%`, background: 'var(--aah-bad)' }} />
                 </span>
                 <span className={s.passLabel}>
                   {g.passed} / {g.total} passing · groundedness {g.groundedness}%
                 </span>
               </span>
               <span style={{ width: 90 }}>
-                <Sparkline data={g.trend} height={32} color={g.degrading ? '#C50F1F' : '#107C10'} />
+                <Sparkline data={g.trend} height={32} color={g.degrading ? 'var(--aah-bad)' : 'var(--aah-good)'} />
               </span>
-              <span className={s.delta} style={{ color: g.vsBaseline < 0 ? '#C50F1F' : '#107C10' }}>
+              <span className={s.delta} style={{ color: g.vsBaseline < 0 ? 'var(--aah-bad)' : 'var(--aah-good)' }}>
                 {g.vsBaseline > 0 ? '+' : ''}
                 {g.vsBaseline} pts
               </span>
@@ -155,7 +155,7 @@ export function MvpView() {
           <SectionTitle title="Issues to fix" caption="The few things that need attention right now." />
           <AttentionList items={issues.slice(0, 4)} />
           {issues.length === 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 0', color: '#107C10' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 0', color: 'var(--aah-good)' }}>
               <CheckmarkCircle24Filled />
               <span style={{ fontWeight: 600 }}>No open issues.</span>
             </div>

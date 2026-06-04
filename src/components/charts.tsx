@@ -20,7 +20,7 @@ export interface ChartTheme {
 const CATEGORICAL = [
   '#165AF1',
   '#3FB6E6',
-  '#13A10E',
+  'var(--aah-good)',
   '#8764B8',
   '#F7A700',
   '#E3008C',

@@ -18,6 +18,7 @@ function Themed() {
   return (
     <FluentProvider
       theme={themeMode === 'dark' ? appDarkTheme : appLightTheme}
+      className={themeMode === 'dark' ? 'theme-dark' : 'theme-light'}
       style={{ height: '100%' }}
     >
       <QueryClientProvider client={queryClient}>

@@ -46,7 +46,7 @@ const useStyles = makeStyles({
 });
 
 function toneColor(t?: ChatTone): string | undefined {
-  return t === 'good' ? '#107C10' : t === 'bad' ? '#C50F1F' : t === 'warn' ? '#B88217' : undefined;
+  return t === 'good' ? 'var(--aah-good)' : t === 'bad' ? 'var(--aah-bad)' : t === 'warn' ? 'var(--aah-warn)' : undefined;
 }
 
 function toneBadge(t?: ChatTone): 'danger' | 'warning' | 'success' | 'informative' {

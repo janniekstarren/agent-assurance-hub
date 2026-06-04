@@ -25,7 +25,7 @@ export const PERSONAS: Persona[] = [
     label: 'MVP',
     tagline: 'Just the essentials — accuracy against golden questions & key issues',
     icon: <Target24Regular />,
-    accent: '#107C10',
+    accent: 'var(--aah-good)',
   },
   {
     id: 'executive',

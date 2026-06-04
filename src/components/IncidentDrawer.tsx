@@ -27,8 +27,8 @@ import { LoadingState } from './primitives';
 import { dateLong } from '../utils/format';
 
 const KIND_META: Record<IncidentKind, { label: string; color: string }> = {
-  'runtime-error': { label: 'Runtime error', color: '#C50F1F' },
-  'quality-degradation': { label: 'Quality degradation', color: '#B88217' },
+  'runtime-error': { label: 'Runtime error', color: 'var(--aah-bad)' },
+  'quality-degradation': { label: 'Quality degradation', color: 'var(--aah-warn)' },
   'cost-spike': { label: 'Cost spike', color: '#CA5010' },
   safety: { label: 'Safety', color: '#8332B0' },
 };
@@ -36,8 +36,8 @@ const KIND_META: Record<IncidentKind, { label: string; color: string }> = {
 const SOURCE_META: Record<DetectionSource, { label: string; color: string }> = {
   'app-insights': { label: 'App Insights', color: '#0F6CBD' },
   'continuous-eval': { label: 'Continuous eval', color: '#00859B' },
-  purview: { label: 'Purview', color: '#C50F1F' },
-  ppac: { label: 'PPAC credits', color: '#107C10' },
+  purview: { label: 'Purview', color: 'var(--aah-bad)' },
+  ppac: { label: 'PPAC credits', color: 'var(--aah-good)' },
   inventory: { label: 'Inventory / change', color: '#6B6B6B' },
   'load-test': { label: 'Load test', color: '#8332B0' },
 };

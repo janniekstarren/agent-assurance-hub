@@ -337,7 +337,7 @@ function AssuranceTab({ agent, onClose }: { agent: Agent; onClose: () => void })
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, fontSize: 11.5, background: tokens.colorNeutralBackground2 }}>
-        <span style={{ width: 8, height: 8, borderRadius: 999, background: run ? '#107C10' : '#D83B01', flexShrink: 0 }} />
+        <span style={{ width: 8, height: 8, borderRadius: 999, background: run ? 'var(--aah-good)' : 'var(--aah-danger)', flexShrink: 0 }} />
         <span>{obs.note ?? (run ? 'Full telemetry — instrumented and evaluated.' : 'Limited telemetry.')}</span>
       </div>
       {run ? (

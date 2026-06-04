@@ -27,7 +27,7 @@ export const item = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.1, 0.9, 0.2, 1] as const } },
 };
 
-export const ENV_COLORS: Record<string, string> = { Dev: '#3FB6E6', Test: '#F7A700', Prod: '#13A10E' };
+export const ENV_COLORS: Record<string, string> = { Dev: '#3FB6E6', Test: '#F7A700', Prod: 'var(--aah-good)' };
 export const ZONE_COLORS: Record<GovernanceZone, string> = { Z1: '#3FB6E6', Z2: '#165AF1', Z3: '#8764B8' };
 export const ZONE_NAMES: Record<GovernanceZone, string> = {
   Z1: 'Z1 · Citizen',

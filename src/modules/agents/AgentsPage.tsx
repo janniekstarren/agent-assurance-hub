@@ -73,7 +73,7 @@ const useStyles = makeStyles({
 });
 
 function assuranceColor(score: number): string {
-  return score >= 85 ? '#107C10' : score >= 70 ? '#B88217' : '#C50F1F';
+  return score >= 85 ? 'var(--aah-good)' : score >= 70 ? 'var(--aah-warn)' : 'var(--aah-bad)';
 }
 
 const LIFECYCLE_OPTIONS: { value: LifecycleState | 'all'; label: string }[] = [

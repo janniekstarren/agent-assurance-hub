@@ -83,7 +83,7 @@ export function HandoverFlow() {
   const current = scenario.steps[idx];
   const conf = current.confidence;
   const below = conf < scenario.threshold;
-  const confColor = below ? '#C50F1F' : conf < scenario.threshold + 10 ? '#B88217' : '#107C10';
+  const confColor = below ? 'var(--aah-bad)' : conf < scenario.threshold + 10 ? 'var(--aah-warn)' : 'var(--aah-good)';
 
   return (
     <div className={s.root}>

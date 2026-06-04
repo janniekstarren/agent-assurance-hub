@@ -98,6 +98,8 @@ const useStyles = makeStyles({
   empty: { padding: '40px 20px', textAlign: 'center', color: tokens.colorNeutralForeground3, fontSize: '13px' },
 });
 
+// Heatmap cells are vivid in both themes (white number on a saturated fill), so
+// these stay literal rather than using the softened theme-aware accents.
 const SEV_COLOR: Record<AlertSeverity, string> = {
   critical: '#C50F1F',
   high: '#D83B01',
@@ -186,8 +188,8 @@ export function SafetyPage() {
 
       <div className={s.statRow}>
         <div className={s.stat}><div className={s.statNum}>{open.length}</div><div className={s.statLabel}>Open alerts <InfoHint content={STAT_HINT.open} label="Where open alerts come from" /></div></div>
-        <div className={s.stat}><div className={s.statNum} style={{ color: '#C50F1F' }}>{critical}</div><div className={s.statLabel}>Critical <InfoHint content={STAT_HINT.critical} /></div></div>
-        <div className={s.stat}><div className={s.statNum} style={{ color: '#D83B01' }}>{attacks}</div><div className={s.statLabel}>Jailbreak / XPIA flags <InfoHint content={STAT_HINT.attacks} /></div></div>
+        <div className={s.stat}><div className={s.statNum} style={{ color: 'var(--aah-bad)' }}>{critical}</div><div className={s.statLabel}>Critical <InfoHint content={STAT_HINT.critical} /></div></div>
+        <div className={s.stat}><div className={s.statNum} style={{ color: 'var(--aah-danger)' }}>{attacks}</div><div className={s.statLabel}>Jailbreak / XPIA flags <InfoHint content={STAT_HINT.attacks} /></div></div>
         <div className={s.stat}><div className={s.statNum}>{agentsAffected}</div><div className={s.statLabel}>Agents affected <InfoHint content={STAT_HINT.agents} /></div></div>
       </div>
 
@@ -287,7 +289,7 @@ export function SafetyPage() {
                     <SeverityBadge severity={a.severity} />
                     <span className={s.alertType}>{TYPE_LABEL[a.type]}</span>
                     {(a.jailbreakDetected || a.xpiaDetected) && (
-                      <ShieldProhibited20Regular style={{ color: '#C50F1F' }} />
+                      <ShieldProhibited20Regular style={{ color: 'var(--aah-bad)' }} />
                     )}
                     <span className={s.alertAgent}>· {a.agentName}</span>
                     <div className={s.actions} onClick={(e) => e.stopPropagation()}>

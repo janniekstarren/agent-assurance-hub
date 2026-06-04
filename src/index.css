@@ -28,6 +28,23 @@ body {
   box-sizing: border-box;
 }
 
+/* Semantic status accents — theme-aware. Saturated and legible on light
+   surfaces; softer / lighter on the dark navy shell so green & red read clearly
+   without being harsh. Used in place of hard-coded status hexes. */
+:root,
+.theme-light {
+  --aah-good: #107c10;
+  --aah-bad: #c50f1f;
+  --aah-warn: #b88217;
+  --aah-danger: #d83b01;
+}
+.theme-dark {
+  --aah-good: #54cf89;
+  --aah-bad: #f4787e;
+  --aah-warn: #e3b86a;
+  --aah-danger: #f0975a;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--colorBrandBackground) 32%, transparent);
 }

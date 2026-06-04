@@ -39,7 +39,7 @@ const useStyles = makeStyles({
 });
 
 function assuranceColor(n: number) {
-  return n >= 85 ? '#13A10E' : n >= 70 ? '#F7A700' : '#C50F1F';
+  return n >= 85 ? 'var(--aah-good)' : n >= 70 ? '#F7A700' : 'var(--aah-bad)';
 }
 
 export function OwnerView() {
@@ -115,10 +115,10 @@ export function OwnerView() {
           <KpiTile label="My MTD spend" value={myMtd} format={(n) => nf(n)} suffix="cr" caption="month to date" onClick={() => navigate('/cost')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Pending approval" value={myPending} accent={myPending ? '#B88217' : undefined} caption="awaiting publish" onClick={() => navigate('/lifecycle')} />
+          <KpiTile label="Pending approval" value={myPending} accent={myPending ? 'var(--aah-warn)' : undefined} caption="awaiting publish" onClick={() => navigate('/lifecycle')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open alerts" value={myOpenAlerts} accent={myOpenAlerts ? '#C50F1F' : undefined} caption="on your agents" onClick={() => navigate('/safety')} />
+          <KpiTile label="Open alerts" value={myOpenAlerts} accent={myOpenAlerts ? 'var(--aah-bad)' : undefined} caption="on your agents" onClick={() => navigate('/safety')} />
         </motion.div>
       </motion.div>
 

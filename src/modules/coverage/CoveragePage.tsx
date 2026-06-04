@@ -14,19 +14,19 @@ import { useAgentObservability, useCollectionMethods, useSignalCoverage } from '
 import type { CoverageLevel, CoverageStatus, TelemetryLevel } from '../../types/domain';
 
 const COVERAGE_META: Record<CoverageLevel, { label: string; color: string }> = {
-  full: { label: 'Full', color: '#107C10' },
-  partial: { label: 'Partial', color: '#B88217' },
-  'metadata-only': { label: 'Metadata only', color: '#D83B01' },
+  full: { label: 'Full', color: 'var(--aah-good)' },
+  partial: { label: 'Partial', color: 'var(--aah-warn)' },
+  'metadata-only': { label: 'Metadata only', color: 'var(--aah-danger)' },
   'requires-instrumentation': { label: 'Needs instrumentation', color: '#0F6CBD' },
   preview: { label: 'Preview', color: '#8332B0' },
 };
-const STATUS_COLOR: Record<CoverageStatus, string> = { GA: '#107C10', preview: '#B88217', beta: '#D83B01' };
+const STATUS_COLOR: Record<CoverageStatus, string> = { GA: 'var(--aah-good)', preview: 'var(--aah-warn)', beta: 'var(--aah-danger)' };
 const LEVEL_META: Record<TelemetryLevel, { label: string; color: string }> = {
-  full: { label: 'Full', color: '#107C10' },
-  runtime: { label: 'Runtime only', color: '#B88217' },
+  full: { label: 'Full', color: 'var(--aah-good)' },
+  runtime: { label: 'Runtime only', color: 'var(--aah-warn)' },
   classic: { label: 'Classic NLU', color: '#0F6CBD' },
-  metadata: { label: 'Metadata only', color: '#D83B01' },
-  none: { label: 'None', color: '#C50F1F' },
+  metadata: { label: 'Metadata only', color: 'var(--aah-danger)' },
+  none: { label: 'None', color: 'var(--aah-bad)' },
 };
 
 const useStyles = makeStyles({
@@ -116,7 +116,7 @@ function Pill({ label, color }: { label: string; color: string }) {
 
 function YesNo({ value }: { value: boolean }) {
   return value ? (
-    <CheckmarkCircle16Filled style={{ color: '#107C10' }} />
+    <CheckmarkCircle16Filled style={{ color: 'var(--aah-good)' }} />
   ) : (
     <DismissCircle16Filled style={{ color: tokens.colorNeutralForeground4 }} />
   );
@@ -188,7 +188,7 @@ export function CoveragePage() {
             <div key={m.name} className={s.methodCard}>
               <div className={s.methodTop}>
                 <span className={s.methodName}>{m.name}</span>
-                <Pill label={m.status === 'in-use' ? 'In use' : 'Recommended'} color={m.status === 'in-use' ? '#107C10' : '#0F6CBD'} />
+                <Pill label={m.status === 'in-use' ? 'In use' : 'Recommended'} color={m.status === 'in-use' ? 'var(--aah-good)' : '#0F6CBD'} />
               </div>
               <span className={s.methodTool}>{m.tool}</span>
               <span className={s.methodText}>{m.purpose}</span>

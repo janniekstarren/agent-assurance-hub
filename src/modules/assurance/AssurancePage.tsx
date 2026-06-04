@@ -425,11 +425,11 @@ function AgentAssurance({ agent }: { agent: Agent }) {
 }
 
 const LEVEL_META: Record<TelemetryLevel, { label: string; color: string; desc: string }> = {
-  full: { label: 'Full telemetry', color: '#107C10', desc: 'App Insights connected + evaluation suite configured.' },
-  runtime: { label: 'Runtime only', color: '#B88217', desc: 'Instrumented, but no evaluation suite — groundedness unavailable.' },
+  full: { label: 'Full telemetry', color: 'var(--aah-good)', desc: 'App Insights connected + evaluation suite configured.' },
+  runtime: { label: 'Runtime only', color: 'var(--aah-warn)', desc: 'Instrumented, but no evaluation suite — groundedness unavailable.' },
   classic: { label: 'Classic NLU', color: '#0F6CBD', desc: 'Recognition confidence available; generative groundedness not applicable.' },
-  metadata: { label: 'Metadata only', color: '#D83B01', desc: 'Not instrumented — only Purview governance metadata.' },
-  none: { label: 'No observability', color: '#C50F1F', desc: 'Shadow / unmonitored — no telemetry.' },
+  metadata: { label: 'Metadata only', color: 'var(--aah-danger)', desc: 'Not instrumented — only Purview governance metadata.' },
+  none: { label: 'No observability', color: 'var(--aah-bad)', desc: 'Shadow / unmonitored — no telemetry.' },
 };
 
 function ObsBanner({ obs }: { obs: Observability }) {

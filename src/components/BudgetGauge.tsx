@@ -36,9 +36,9 @@ const useStyles = makeStyles({
 });
 
 function color(pct: number): string {
-  if (pct > 100) return '#C50F1F';
-  if (pct >= 75) return '#B88217';
-  return '#107C10';
+  if (pct > 100) return 'var(--aah-bad)';
+  if (pct >= 75) return 'var(--aah-warn)';
+  return 'var(--aah-good)';
 }
 
 export function BudgetGauge({ budget }: { budget: AgentBudget }) {

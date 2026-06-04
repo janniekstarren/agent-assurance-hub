@@ -49,10 +49,16 @@ export const appDarkTheme: Theme = {
 appLightTheme.colorNeutralBackground2 = '#F4F6FB';
 appLightTheme.colorNeutralBackground3 = '#EAEEF6';
 
-// Deepen the dark canvas for the "never flat-and-grey" depth target.
-appDarkTheme.colorNeutralBackground1 = '#181A22';
-appDarkTheme.colorNeutralBackground2 = '#1E202B';
-appDarkTheme.colorNeutralBackground3 = '#121319';
+// Dark shell is a subtle desaturated navy (not flat black-grey) so the whole
+// app reads calmer and less harsh. Canvas darkest → cards lift → nav lightest.
+appDarkTheme.colorNeutralBackground1 = '#171E2E'; // cards / panels
+appDarkTheme.colorNeutralBackground2 = '#1B2334'; // nav rail, secondary surfaces
+appDarkTheme.colorNeutralBackground3 = '#0E1320'; // app canvas (deep navy)
+appDarkTheme.colorNeutralBackground4 = '#222C40'; // track / inset fills
+// Soften strokes to a blue-grey so borders don't cut harshly on navy.
+appDarkTheme.colorNeutralStroke1 = '#39435C';
+appDarkTheme.colorNeutralStroke2 = '#2A3347';
+appDarkTheme.colorNeutralStroke3 = '#222A3B';
 
 // --- Elevation ------------------------------------------------------------
 // Replace Fluent's flat grey shadows with soft, layered, indigo-tinted depth
