@@ -19,7 +19,6 @@ import {
   WeatherSunny20Regular,
 } from '@fluentui/react-icons';
 import { useLocation } from 'react-router-dom';
-import { BRAND_PRIMARY } from './theme';
 import { useAppState } from './AppState';
 import type { EnvFilter } from './AppState';
 import { NAV_BY_PATH } from './navItems';
@@ -71,21 +70,6 @@ const useStyles = makeStyles({
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
     color: tokens.colorNeutralForeground3,
-  },
-  askButton: {
-    backgroundImage: 'linear-gradient(135deg, #2E6BF5, #1547D1)',
-    border: 'none',
-    color: '#fff',
-    boxShadow: `0 2px 10px color-mix(in srgb, ${BRAND_PRIMARY} 42%, transparent)`,
-    ':hover': {
-      backgroundImage: 'linear-gradient(135deg, #3D72F3, #165AF1)',
-      color: '#fff',
-      boxShadow: `0 4px 16px color-mix(in srgb, ${BRAND_PRIMARY} 54%, transparent)`,
-    },
-    ':hover:active': {
-      backgroundImage: 'linear-gradient(135deg, #1547D1, #1340C8)',
-      color: '#fff',
-    },
   },
 });
 
@@ -155,7 +139,6 @@ export function CommandBar() {
 
         <Button
           appearance="primary"
-          className={s.askButton}
           icon={<ChatSparkle20Regular />}
           onClick={() => openAskWith('')}
         >

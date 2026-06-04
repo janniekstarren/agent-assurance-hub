@@ -92,16 +92,16 @@ export function MvpView() {
 
       <motion.div className={s.kpiGrid} variants={stagger} initial="initial" animate="animate">
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" icon={<CheckmarkCircle24Regular />} caption="passing golden questions" onClick={() => navigate('/assurance')} />
+          <KpiTile label="On track" value={onTrack} suffix={`/ ${evaluated}`} accent="#107C10" icon={<CheckmarkCircle24Regular />} caption="passing golden questions" hint="Agents whose latest evaluation run passes their golden-question set. Source: Copilot Studio Agent Evaluation API, read from the continuous-eval Dataverse table." onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : '#6E6E6E'} icon={<Warning24Regular />} caption="below baseline accuracy" onClick={() => navigate('/assurance')} />
+          <KpiTile label="Degrading" value={degrading.length} accent={degrading.length ? '#C50F1F' : '#6E6E6E'} icon={<Warning24Regular />} caption="below baseline accuracy" hint="Evaluated agents whose groundedness has fallen below their published baseline, or with failing golden questions — compared run-over-run." onClick={() => navigate('/assurance')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : '#6E6E6E'} icon={<PlugDisconnected24Regular />} caption="not instrumented / evaluated" onClick={() => navigate('/coverage')} />
+          <KpiTile label="No telemetry" value={noTelemetry} accent={noTelemetry ? '#D83B01' : '#6E6E6E'} icon={<PlugDisconnected24Regular />} caption="not instrumented / evaluated" hint="Non-draft agents with no evaluation suite or Application Insights connection — their quality can't be measured. Source: per-agent observability." onClick={() => navigate('/coverage')} />
         </motion.div>
         <motion.div variants={item} className={s.cell}>
-          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : '#6E6E6E'} icon={<ErrorCircle24Regular />} caption="need attention" onClick={() => navigate('/safety')} />
+          <KpiTile label="Open issues" value={issues.length} accent={issues.length ? '#D83B01' : '#6E6E6E'} icon={<ErrorCircle24Regular />} caption="need attention" hint="Items needing attention across safety, cost, drift and approvals — the list shown on the right." onClick={() => navigate('/safety')} />
         </motion.div>
       </motion.div>
 

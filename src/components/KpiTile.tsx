@@ -5,11 +5,12 @@ import { makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
 import { ArrowDown16Filled, ArrowUp16Filled } from '@fluentui/react-icons';
 import type { ReactNode } from 'react';
 import { CountUp } from './CountUp';
-import { Panel } from './primitives';
+import { InfoHint, Panel } from './primitives';
 
 const useStyles = makeStyles({
   tile: { display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' },
+  labelRow: { display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 },
   label: {
     fontSize: '11.5px',
     fontWeight: 600,
@@ -79,6 +80,7 @@ export function KpiTile({
   progress,
   progressColor,
   accent,
+  hint,
   children,
 }: {
   label: string;
@@ -93,13 +95,17 @@ export function KpiTile({
   progress?: number;
   progressColor?: string;
   accent?: string;
+  hint?: ReactNode;
   children?: ReactNode;
 }) {
   const s = useStyles();
   return (
     <Panel interactive={!!onClick} onClick={onClick} className={s.tile}>
       <div className={s.head}>
-        <span className={s.label}>{label}</span>
+        <span className={s.labelRow}>
+          <span className={s.label}>{label}</span>
+          {hint && <InfoHint content={hint} />}
+        </span>
         <span className={s.headRight}>
           {live && <span className={mergeClasses('pulse-dot', s.pulseDot)} aria-label="live" />}
           {icon && (

@@ -255,10 +255,12 @@ export function Agent365Page() {
             ) : (
               risky.map((r) => (
                 <div key={r.agentId} className={s.riskCard}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <RiskBadge level={r.riskLevel} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ width: 64, flexShrink: 0, display: 'flex' }}>
+                      <RiskBadge level={r.riskLevel} />
+                    </span>
                     <span className={s.regName}>{r.displayName}</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 11, color: tokens.colorNeutralForeground3 }}>
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 11, color: tokens.colorNeutralForeground3 }}>
                       {relativeFromNow(r.lastSeen)}
                     </span>
                   </div>

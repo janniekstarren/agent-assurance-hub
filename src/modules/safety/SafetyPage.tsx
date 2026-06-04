@@ -22,6 +22,7 @@ import { useSearchParams } from 'react-router-dom';
 import { SeverityBadge } from '../../components/badges';
 import {
   ErrorState,
+  InfoHint,
   LoadingState,
   PageContainer,
   Panel,
@@ -47,7 +48,7 @@ const useStyles = makeStyles({
   statRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' },
   stat: { padding: '12px 14px', borderRadius: tokens.borderRadiusLarge, border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: tokens.colorNeutralBackground1 },
   statNum: { fontSize: '26px', fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
-  statLabel: { fontSize: '11.5px', color: tokens.colorNeutralForeground3, marginTop: '3px' },
+  statLabel: { fontSize: '11.5px', color: tokens.colorNeutralForeground3, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' },
   // heatmap
   heatTable: { width: '100%' },
   heatCorner: { fontSize: '11px', color: tokens.colorNeutralForeground3, textAlign: 'left', fontWeight: 600, padding: '4px' },
@@ -111,6 +112,26 @@ const TYPE_LABEL: Record<AlertType, string> = {
   'sensitivity-label-exposed': 'Label exposed',
 };
 
+/** How each alert type is generated — surfaced via the info icons so a reviewer
+    can see the provenance of any signal. */
+const TYPE_HINT: Record<AlertType, string> = {
+  'jailbreak-detected':
+    "Raised when Microsoft Purview's prompt-injection classifier flags a user prompt that tries to bypass the agent's instructions or safety guardrails — the JailbreakDetected flag on the runtime interaction. Captured via the Office 365 Management Activity API (Audit.AI). Metadata only; the raw prompt is not stored here.",
+  XPIA:
+    'Cross-Prompt Injection Attack — malicious instructions hidden inside content the agent ingests (a document, email or web page). Purview raises the XPIADetected flag. Same audit path as jailbreak.',
+  oversharing:
+    "Purview DLP flags when an agent returns data above the caller's access scope or a sensitivity label's policy — e.g. Confidential rows surfaced to an unentitled user.",
+  'sensitivity-label-exposed':
+    'A sensitivity-labelled item (e.g. Confidential) appeared in an agent response. Purview audit records the label and the resource touched — not the content itself.',
+};
+
+const STAT_HINT = {
+  open: 'Audit alerts currently in New, Acknowledged or Escalated state. Source: Microsoft Purview audit via the Office 365 Management Activity API (Audit.AI feed).',
+  critical: 'Open alerts at critical severity. Severity is assigned by the Purview classifier per detection.',
+  attacks: 'Alerts carrying a JailbreakDetected or XPIADetected flag — i.e. prompt-injection attempts, whether or not the response was blocked.',
+  agents: 'Distinct agents with at least one open alert.',
+} as const;
+
 export function SafetyPage() {
   const s = useStyles();
   const [params, setParams] = useSearchParams();
@@ -164,10 +185,10 @@ export function SafetyPage() {
       </div>
 
       <div className={s.statRow}>
-        <div className={s.stat}><div className={s.statNum}>{open.length}</div><div className={s.statLabel}>Open alerts</div></div>
-        <div className={s.stat}><div className={s.statNum} style={{ color: '#C50F1F' }}>{critical}</div><div className={s.statLabel}>Critical</div></div>
-        <div className={s.stat}><div className={s.statNum} style={{ color: '#D83B01' }}>{attacks}</div><div className={s.statLabel}>Jailbreak / XPIA flags</div></div>
-        <div className={s.stat}><div className={s.statNum}>{agentsAffected}</div><div className={s.statLabel}>Agents affected</div></div>
+        <div className={s.stat}><div className={s.statNum}>{open.length}</div><div className={s.statLabel}>Open alerts <InfoHint content={STAT_HINT.open} label="Where open alerts come from" /></div></div>
+        <div className={s.stat}><div className={s.statNum} style={{ color: '#C50F1F' }}>{critical}</div><div className={s.statLabel}>Critical <InfoHint content={STAT_HINT.critical} /></div></div>
+        <div className={s.stat}><div className={s.statNum} style={{ color: '#D83B01' }}>{attacks}</div><div className={s.statLabel}>Jailbreak / XPIA flags <InfoHint content={STAT_HINT.attacks} /></div></div>
+        <div className={s.stat}><div className={s.statNum}>{agentsAffected}</div><div className={s.statLabel}>Agents affected <InfoHint content={STAT_HINT.agents} /></div></div>
       </div>
 
       {heatmap && heatmap.agents.length > 0 && (
@@ -179,7 +200,12 @@ export function SafetyPage() {
                 <tr>
                   <th className={s.heatCorner}>Agent</th>
                   {heatmap.types.map((t) => (
-                    <th key={t} className={s.heatColH}>{TYPE_LABEL[t]}</th>
+                    <th key={t} className={s.heatColH}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
+                        {TYPE_LABEL[t]}
+                        <InfoHint content={TYPE_HINT[t]} label={`How ${TYPE_LABEL[t]} is detected`} />
+                      </span>
+                    </th>
                   ))}
                 </tr>
               </thead>

@@ -3,11 +3,17 @@
 import {
   Button,
   Spinner,
+  Tooltip,
   makeStyles,
   mergeClasses,
   tokens,
 } from '@fluentui/react-components';
-import { ArrowClockwise20Regular, Box24Regular, ErrorCircle24Regular } from '@fluentui/react-icons';
+import {
+  ArrowClockwise20Regular,
+  Box24Regular,
+  ErrorCircle24Regular,
+  Info16Regular,
+} from '@fluentui/react-icons';
 import type { ReactNode } from 'react';
 
 const useStyles = makeStyles({
@@ -65,7 +71,38 @@ const useStyles = makeStyles({
   },
   stateIcon: { fontSize: '28px', color: tokens.colorNeutralForeground4 },
   errorIcon: { color: tokens.colorPaletteRedForeground1 },
+  infoHint: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    cursor: 'help',
+    color: tokens.colorNeutralForeground4,
+    verticalAlign: 'middle',
+    outline: 'none',
+    ':hover': { color: tokens.colorBrandForeground1 },
+    ':focus-visible': { color: tokens.colorBrandForeground1 },
+  },
+  hintBody: { display: 'block', maxWidth: '300px', lineHeight: 1.5, fontSize: '12px' },
 });
+
+/**
+ * Info icon with a hover/focus tooltip explaining where a signal comes from and
+ * how it is calculated. Keeps provenance one click away from any metric.
+ */
+export function InfoHint({ content, label }: { content: ReactNode; label?: string }) {
+  const s = useStyles();
+  return (
+    <Tooltip
+      content={{ children: <span className={s.hintBody}>{content}</span> }}
+      relationship="description"
+      withArrow
+      positioning="above"
+    >
+      <span tabIndex={0} role="button" aria-label={label ?? 'Where this comes from'} className={s.infoHint}>
+        <Info16Regular />
+      </span>
+    </Tooltip>
+  );
+}
 
 export function PageContainer({
   children,
