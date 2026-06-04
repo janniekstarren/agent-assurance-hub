@@ -169,6 +169,7 @@ export function AssurancePage() {
       <Panel>
         <SectionTitle
           title="Quality gates"
+          hint="Pass / warn / fail per agent from its latest evaluation run against the golden set. Source: Copilot Studio Agent Evaluation API (preview), read from the continuous-eval Dataverse table."
           caption="Each agent's evaluation gate against thresholds, with an alert-to-action runbook."
         />
         <QualityGatesBoard />
@@ -198,6 +199,7 @@ function AgentAssurance({ agent }: { agent: Agent }) {
       <Panel>
         <SectionTitle
           title="Evaluation scores — 90 days"
+          hint="Groundedness, relevance, completeness and abstention from the agent's scheduled evaluation runs (LLM-as-a-judge against reference answers). The dashed marker correlates a score drop to a knowledge-base or model change."
           caption={
             obs.confidence === 'classic-nlu'
               ? 'Generative groundedness does not apply to classic-NLU (scripted) answers.'
@@ -350,7 +352,7 @@ function AgentAssurance({ agent }: { agent: Agent }) {
       </div>
       ) : (
         <Panel>
-          <SectionTitle title="Confidence" />
+          <SectionTitle title="Confidence" hint="Generative confidence is derived from instrumented Application Insights events — not a native Copilot Studio API. Classic-NLU agents expose recognition confidence instead." />
           <NotAvailable obs={obs} signal="Confidence" />
         </Panel>
       )}

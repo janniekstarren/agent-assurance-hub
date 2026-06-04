@@ -56,7 +56,7 @@ const useStyles = makeStyles({
     marginBottom: '4px',
   },
   sectionTitleText: { display: 'flex', flexDirection: 'column', gap: '2px' },
-  sectionH: { fontSize: '16px', fontWeight: 700, letterSpacing: '-0.018em', margin: 0 },
+  sectionH: { fontSize: '16px', fontWeight: 700, letterSpacing: '-0.018em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' },
   sectionCaption: { fontSize: '12px', color: tokens.colorNeutralForeground3, lineHeight: 1.4 },
   state: {
     display: 'flex',
@@ -153,16 +153,22 @@ export function SectionTitle({
   title,
   caption,
   actions,
+  hint,
 }: {
   title: ReactNode;
   caption?: ReactNode;
   actions?: ReactNode;
+  /** Optional provenance hint shown as an info icon next to the title. */
+  hint?: ReactNode;
 }) {
   const s = useStyles();
   return (
     <div className={s.sectionTitle}>
       <div className={s.sectionTitleText}>
-        <h2 className={s.sectionH}>{title}</h2>
+        <h2 className={s.sectionH}>
+          {title}
+          {hint && <InfoHint content={hint} />}
+        </h2>
         {caption && <span className={s.sectionCaption}>{caption}</span>}
       </div>
       {actions && <div>{actions}</div>}

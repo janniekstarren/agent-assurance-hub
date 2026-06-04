@@ -167,11 +167,11 @@ export function CostPage() {
       </div>
 
       <div className={s.kpiGrid}>
-        <KpiTile label="MTD credits" value={sum.totalCredits} format={(n) => nf(n)} suffix="cr" accent="#165AF1" icon={<Money24Regular />} caption="month to date" />
-        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-bad)" icon={<Wallet24Regular />} caption="consumes credits" />
-        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-good)" icon={<Gift24Regular />} caption="M365 Copilot covered" />
-        <KpiTile label="Est. consumption" value={sum.estMonthlyConsumptionUsd} format={(n) => usd(n)} icon={<CalendarLtr24Regular />} caption="projected $/month (PAYG)" />
-        <KpiTile label="Seat licences" value={seatMonthly} format={(n) => usd(n)} icon={<People24Regular />} caption="M365 Copilot + Agent 365 /mo" />
+        <KpiTile label="MTD credits" value={sum.totalCredits} format={(n) => nf(n)} suffix="cr" accent="#165AF1" icon={<Money24Regular />} caption="month to date" hint="Total Copilot Credits consumed this month across the estate. Source: Power Platform admin center credit reports + Azure Cost Management, daily-aggregated." />
+        <KpiTile label="Billed" value={sum.billedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-bad)" icon={<Wallet24Regular />} caption="consumes credits" hint="Credits that actually draw down the tenant pool (chargeable). Excludes calls covered by an M365 Copilot seat." />
+        <KpiTile label="Zero-rated" value={sum.zeroRatedCredits} format={(n) => nf(n)} suffix="cr" accent="var(--aah-good)" icon={<Gift24Regular />} caption="M365 Copilot covered" hint="Credits consumed by M365 Copilot–licensed users on Microsoft channels — covered by their seat, so they don't draw down the credit pool." />
+        <KpiTile label="Est. consumption" value={sum.estMonthlyConsumptionUsd} format={(n) => usd(n)} icon={<CalendarLtr24Regular />} caption="projected $/month (PAYG)" hint="Projected month-end pay-as-you-go spend if billed credits continue at the current daily rate. Illustrative; PAYG rate applied to billed credits only." />
+        <KpiTile label="Seat licences" value={seatMonthly} format={(n) => usd(n)} icon={<People24Regular />} caption="M365 Copilot + Agent 365 /mo" hint="Fixed monthly cost of M365 Copilot + Agent 365 seats. A separate governance axis — seats don't fund credit consumption." />
       </div>
 
       <Panel>

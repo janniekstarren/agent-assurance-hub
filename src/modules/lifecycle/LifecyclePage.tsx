@@ -110,7 +110,7 @@ export function LifecyclePage() {
       />
 
       <Panel>
-        <SectionTitle title="Approval gate" caption="Publish or reject — mirrors the M365 admin-center gate + Agent 365 approval flow." />
+        <SectionTitle title="Approval gate" hint="Publish / reject decisions. Mirrors the M365 admin-center publishing gate plus the Agent 365 approval flow (preview)." caption="Publish or reject — mirrors the M365 admin-center gate + Agent 365 approval flow." />
         <div className={s.gate}>
           <div>
             <AnimatePresence mode="popLayout">
@@ -176,7 +176,7 @@ export function LifecyclePage() {
       </Panel>
 
       <Panel>
-        <SectionTitle title="Pipeline run history" caption="Power Platform Pipelines carrying solutions Dev → Test → Prod. Up to 7 stages." />
+        <SectionTitle title="Pipeline run history" hint="Power Platform Pipelines run history from the host environment's Dataverse — solutions promoted Dev → Test → Prod. Target environments must be Managed Environments." caption="Power Platform Pipelines carrying solutions Dev → Test → Prod. Up to 7 stages." />
         {pipelines.isLoading || !pipelines.data ? (
           <LoadingState />
         ) : (

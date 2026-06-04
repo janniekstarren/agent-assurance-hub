@@ -33,16 +33,16 @@ body {
    without being harsh. Used in place of hard-coded status hexes. */
 :root,
 .theme-light {
-  --aah-good: #107c10;
-  --aah-bad: #c50f1f;
-  --aah-warn: #b88217;
-  --aah-danger: #d83b01;
+  --aah-good: #2f8f5b;
+  --aah-bad: #cb4b58;
+  --aah-warn: #b07d1e;
+  --aah-danger: #cc6638;
 }
 .theme-dark {
-  --aah-good: #54cf89;
-  --aah-bad: #f4787e;
-  --aah-warn: #e3b86a;
-  --aah-danger: #f0975a;
+  --aah-good: #5cc98c;
+  --aah-bad: #ec8088;
+  --aah-warn: #e0b66c;
+  --aah-danger: #ee9a66;
 }
 
 ::selection {

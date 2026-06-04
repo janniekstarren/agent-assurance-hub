@@ -1,8 +1,9 @@
-/** A slim banner that appears when a non-baseline demo scenario is active,
-    summarising the story and deep-linking to its module. */
+/** A slim, low-key ribbon that marks which demo scenario is active and
+    deep-links to its story. Deliberately styled as presenter chrome — not an
+    alert — so it reads differently from page content like the Overview summary. */
 
 import { Button, makeStyles, tokens } from '@fluentui/react-components';
-import { ArrowRight16Regular, Dismiss16Regular } from '@fluentui/react-icons';
+import { ArrowRight16Regular, Beaker16Regular, Dismiss16Regular } from '@fluentui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -10,32 +11,13 @@ import { useAppState } from './AppState';
 import { SCENARIO_BY_ID } from '../mock/scenarios';
 import type { ScenarioId } from '../types/domain';
 
-const INTENT: Record<ScenarioId, { bar: string; bg: string; fg: string }> = {
-  healthy: {
-    bar: tokens.colorStatusSuccessBorder1,
-    bg: tokens.colorStatusSuccessBackground1,
-    fg: tokens.colorStatusSuccessForeground1,
-  },
-  drift: {
-    bar: tokens.colorStatusWarningBorder1,
-    bg: tokens.colorStatusWarningBackground1,
-    fg: tokens.colorStatusWarningForeground1,
-  },
-  'data-leak': {
-    bar: tokens.colorStatusDangerBorder1,
-    bg: tokens.colorStatusDangerBackground1,
-    fg: tokens.colorStatusDangerForeground1,
-  },
-  'cost-spike': {
-    bar: tokens.colorStatusWarningBorder1,
-    bg: tokens.colorStatusWarningBackground1,
-    fg: tokens.colorStatusWarningForeground1,
-  },
-  handover: {
-    bar: tokens.colorBrandStroke1,
-    bg: tokens.colorBrandBackground2,
-    fg: tokens.colorBrandForeground1,
-  },
+/** Intent dot colour per scenario. */
+const DOT: Record<ScenarioId, string> = {
+  healthy: tokens.colorStatusSuccessBorder1,
+  drift: tokens.colorStatusWarningBorder1,
+  'data-leak': tokens.colorStatusDangerBorder1,
+  'cost-spike': tokens.colorStatusWarningBorder1,
+  handover: tokens.colorBrandStroke1,
 };
 
 const useStyles = makeStyles({
@@ -43,13 +25,32 @@ const useStyles = makeStyles({
   banner: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '9px 18px',
+    gap: '10px',
+    padding: '5px 12px 5px 14px',
+    backgroundColor: tokens.colorNeutralBackground2,
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
   },
-  bar: { width: '4px', alignSelf: 'stretch', borderRadius: '3px' },
-  text: { fontSize: '13px', fontWeight: 600, flex: 1 },
-  spacer: { flex: 1 },
+  tag: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    fontSize: '10.5px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: tokens.colorNeutralForeground3,
+    flexShrink: 0,
+  },
+  dot: { width: '7px', height: '7px', borderRadius: '999px', flexShrink: 0 },
+  text: {
+    fontSize: '12.5px',
+    color: tokens.colorNeutralForeground2,
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
 });
 
 export function ScenarioBanner() {
@@ -65,7 +66,6 @@ export function ScenarioBanner() {
 
   const sc = SCENARIO_BY_ID[scenario];
   const show = scenario !== 'healthy' && sc?.banner && dismissed !== scenario;
-  const intent = INTENT[scenario];
   const onRoute = sc?.route && location.pathname === sc.route.split('?')[0];
 
   return (
@@ -78,28 +78,30 @@ export function ScenarioBanner() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.28, ease: [0.1, 0.9, 0.2, 1] }}
           >
-            <div className={s.banner} style={{ backgroundColor: intent.bg, color: intent.fg }}>
-              <div className={s.bar} style={{ backgroundColor: intent.bar }} />
+            <div className={s.banner}>
+              <span className={s.tag}>
+                <Beaker16Regular />
+                Demo scenario
+              </span>
+              <span className={s.dot} style={{ backgroundColor: DOT[scenario] }} />
               <span className={s.text}>{sc.banner}</span>
               {!onRoute && (
                 <Button
                   size="small"
-                  appearance="transparent"
+                  appearance="subtle"
                   icon={<ArrowRight16Regular />}
                   iconPosition="after"
                   onClick={() => navigate(sc.route)}
-                  style={{ color: intent.fg }}
                 >
                   View story
                 </Button>
               )}
               <Button
                 size="small"
-                appearance="transparent"
+                appearance="subtle"
                 icon={<Dismiss16Regular />}
                 aria-label="Dismiss"
                 onClick={() => setDismissed(scenario)}
-                style={{ color: intent.fg }}
               />
             </div>
           </motion.div>

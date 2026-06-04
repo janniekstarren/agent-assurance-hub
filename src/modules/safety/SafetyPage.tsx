@@ -98,13 +98,13 @@ const useStyles = makeStyles({
   empty: { padding: '40px 20px', textAlign: 'center', color: tokens.colorNeutralForeground3, fontSize: '13px' },
 });
 
-// Heatmap cells are vivid in both themes (white number on a saturated fill), so
-// these stay literal rather than using the softened theme-aware accents.
+// Heatmap cells carry a white number, so they need a fill dark enough for
+// contrast — a muted (not glaring) palette that holds up in both themes.
 const SEV_COLOR: Record<AlertSeverity, string> = {
-  critical: '#C50F1F',
-  high: '#D83B01',
-  medium: '#B88217',
-  low: '#5C9BD5',
+  critical: '#B5404C',
+  high: '#B96838',
+  medium: '#9C7622',
+  low: '#5C82A8',
 };
 
 const TYPE_LABEL: Record<AlertType, string> = {
